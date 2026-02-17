@@ -2,8 +2,20 @@ package org.example;
 public class Main{
     public static void main (String[] args){
 
-        //would possibly need a lot of loops to control what option the user is trying to pick (going in and out of),
-        // then depending on what kind of user is made would control there permissions
+        BookingWaitlistingManager testBook = new BookingWaitlistingManager(5, "1111110","Sports Event");
+        testBook.addUser("Todd Jeff");
+        testBook.addUser("Jason Todd");
+        testBook.addUser("Bruce Wayne");
+        testBook.addUser("Clark Kent");
+        testBook.addUser("Diana Prince");
+        testBook.addUser("Jimmy Neutron");
+        testBook.addUser("Tony Stark");
+
+        testBook.cancelBooking("Clark Kent");
+
+        System.out.println(testBook.getStatus("Todd Jeff"));
+
+        testBook.bookWaitlistPrint();
 
 
     }

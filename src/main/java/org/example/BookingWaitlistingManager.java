@@ -151,6 +151,7 @@ public class BookingWaitlistingManager {
     //note that a lot of the prints in this part will need to be printed/shown in the UI later not in the terminal
     public void bookWaitlistPrint(){
         System.out.println("Event Name/ID: " + EventName + "/" + EventID);
+        System.out.println("Booking ID: " + BookingID);
         System.out.println("Event Created On: " + CreatedAt);
         System.out.println("Users Booked: ");
         for (int i = 0; i < capacity; i++) {
