@@ -1,10 +1,13 @@
 package org.example;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class BookingManager {
     public ArrayList<String> UserList = new ArrayList<>();
     public int capacity;
 
+    private LocalDateTime CreatedAt;
     private String UserID;
     private String UserName;
     private String EventID;
@@ -88,12 +91,24 @@ public class BookingManager {
         this.status = status;
     }
 
+    public LocalDateTime getCreatedAt(){
+        return CreatedAt;
+    }
+
+    public void setCreatedAt(LocalDateTime CreatedAt){
+        this.CreatedAt = CreatedAt;
+    }
+
 
     //constructor
     public BookingManager (int capacity, String EventID, String EventName){
         this.capacity = capacity;
         this.EventID = EventID;
         this.EventName = EventName;
+
+        int BookingIDInt = ThreadLocalRandom.current().nextInt(999999, 10000000);
+        BookingID = String.valueOf(BookingIDInt);
+        CreatedAt = LocalDateTime.now();
         UserList.add(null);
     }
 
@@ -136,6 +151,7 @@ public class BookingManager {
     //note that a lot of the prints in this part will need to be printed/shown in the UI later not in the terminal
     public void bookWaitlistPrint(){
         System.out.println("Event Name/ID: " + EventName + "/" + EventID);
+        System.out.println("Event Created On: " + CreatedAt);
         System.out.println("Users Booked: ");
         for (int i = 0; i < capacity; i++) {
             if (UserList.get(i) != null){
