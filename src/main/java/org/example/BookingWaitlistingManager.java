@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.time.LocalDateTime;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class BookingManager {
+public class BookingWaitlistingManager {
     public ArrayList<String> UserList = new ArrayList<>();
     public int capacity;
 
@@ -101,7 +101,7 @@ public class BookingManager {
 
 
     //constructor
-    public BookingManager (int capacity, String EventID, String EventName){
+    public BookingWaitlistingManager (int capacity, String EventID, String EventName){
         this.capacity = capacity;
         this.EventID = EventID;
         this.EventName = EventName;
