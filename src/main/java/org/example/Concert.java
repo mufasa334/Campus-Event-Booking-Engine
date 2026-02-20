@@ -1,26 +1,27 @@
 package org.example;
+import java.time.LocalDateTime;
+
 public class Concert extends Event{
 
-    private int ageReg;
+    private String ageRestriction;
 
     //------------------------------------CONSTRUCTOR------------------------------------------------
 
-    public Concert(int id, String title, String date, int time, String location, int capacity, int ageReg) {
+    public Concert(String id, String title, LocalDateTime dateTime, String location, int capacity, String ageRestriction) {
 
-        super(id, title, date, time, location, capacity);
-        setAgeReg(ageReg);
+        super(id, title, dateTime, location, capacity, EventType.CONCERT);
+        setAgeRestriction(ageRestriction);
     }
 
     //----------------------------------SETTERS / GETTERS-------------------------------------------
 
-    public void setAgeReg(int ageReg) {
-        this.ageReg = ageReg;
+    public void setAgeRestriction(String ageRestriction) {
+        this.ageRestriction = ageRestriction;
     }
 
-    public int getAgeReg() {
-        return ageReg;
+    public String getAgeRestriction() {
+        return ageRestriction;
     }
 
     //---------------------------------------METHODS---------------------------------------------------
 }
-

@@ -1,23 +1,25 @@
 package org.example;
+import java.time.LocalDateTime;
+
 public class Seminar extends Event{
 
-    private String speaker;
+    private String speakerName;
 
     //-------------------------------------CONSTRUCTOR------------------------------------------------
 
-    public Seminar(int id, String title, String date, int time, String location, int capacity, String speaker) {
-        super(id, title, date, time, location, capacity);
-        setSpeaker(speaker);
+    public Seminar(String id, String title, LocalDateTime dateTime, String location, int capacity, String speakerName) {
+        super(id, title, dateTime, location, capacity, EventType.SEMINAR);
+        setSpeakerName(speakerName);
     }
 
     //-----------------------------------SETTERS / GETTERS--------------------------------------------
 
-    public void setSpeaker(String speaker) {
-        this.speaker = speaker;
+    public void setSpeakerName(String speakerName) {
+        this.speakerName = speakerName;
     }
 
-    public String getSpeaker() {
-        return speaker;
+    public String getSpeakerName() {
+        return speakerName;
     }
 
     //----------------------------------------METHODS--------------------------------------------------

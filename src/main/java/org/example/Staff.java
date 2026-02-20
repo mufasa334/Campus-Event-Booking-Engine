@@ -1,12 +1,12 @@
 package org.example;
-public class Staff extends Person{
+public class Staff extends User {
 
-    private Event[] booking = new Event[5];
+    //private Event[] booking = new Event[5];
 
     //----------------------------------CONSTRUCTOR-----------------------------------------------
 
-    public Staff(int id, String name, String email) {
-        super(id, name, email);
+    public Staff(String id, String name, String email) {
+        super(id, name, email, UserType.STAFF, 5);
     }
 
     //---------------------------------SETTERS / GETTERS--------------------------------------------
@@ -14,8 +14,8 @@ public class Staff extends Person{
     //--------------------------------------METHODS-------------------------------------------------
 
     //A METHOD THAT PRINTS OUT ALL OF THIS PERSON'S DETAILS
-    public void details() {
-        System.out.println("USER ID:         " + super.getId());
+    /*public void details() {
+        System.out.println("USER ID:         " + super.getUserId());
         System.out.println("NAME:            " + super.getName());
         System.out.println("EMAIL:           " + super.getEmail());
         System.out.println("VISITOR TYPE:    Staff");
@@ -53,8 +53,7 @@ public class Staff extends Person{
                 booking[i] = event;
             }
         }
-    }
+    }*/
 
 
 }
-

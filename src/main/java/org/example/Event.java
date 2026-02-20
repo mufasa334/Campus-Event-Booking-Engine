@@ -1,46 +1,53 @@
 package org.example;
+import java.time.LocalDateTime;
+
 public abstract class Event {
 
-    private int id;
-    private int time;
+    public enum EventStatus {
+        CONFIRMED,
+        WAITLISTED,
+        CANCELLED
+    }
+
+    public enum EventType {
+        WORKSHOP,
+        CONCERT,
+        SEMINAR
+    }
+
+    private String eventId;
     private int capacity;
-    private boolean status;
     private String location;
-    private String date;
     private String title;
-    private Person[] attendees;
-    private int count = 0;
+    private LocalDateTime dateTime;
+    private EventStatus status;
+    private EventType eventType;
+    //private User[] attendees;
+    //private int count = 0;
     //Maybe make an arraylist for the waitlist or something
     //-----------------------------------CONSTRUCTOR--------------------------------------------------
 
-    public Event(int id, String title, String date, int time, String location, int capacity) {
+    public Event(String eventId, String title, LocalDateTime dateTime, String location, int capacity, EventType eventType) {
 
-        setId(id);
+        setEventId(eventId);
         setTitle(title);
-        setDate(date);
-        setTime(time);
+        setDateTime(dateTime);
         setLocation(location);
         setCapacity(capacity);
-        status = true;
-        attendees = new Person[capacity];
+        setStatus(EventStatus.CONFIRMED);
+        setEventType(eventType);
+
+        //attendees = new User[capacity];
     }
 
     //----------------------------SETTERS / GETTERS-------------------------------------------------
 
-    public void setId(int id) {
-        this.id = id;
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setTime(int time) {
-        this.time = time;
-    }
-
-    public int getTime() {
-        return time;
+    public String getEventId() {
+        return eventId;
     }
 
     public void setCapacity(int capacity) {
@@ -51,11 +58,11 @@ public abstract class Event {
         return capacity;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(EventStatus status) {
         this.status = status;
     }
 
-    public boolean getStatus() {
+    public EventStatus getStatus() {
         return status;
     }
 
@@ -67,14 +74,6 @@ public abstract class Event {
         return location;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
     public void setTitle(String title) {
         this.title = title;
     }
@@ -83,11 +82,19 @@ public abstract class Event {
         return title;
     }
 
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
+    public LocalDateTime getDateTime() { return dateTime; }
+
+    public void setEventType(EventType eventType) { this.eventType = eventType; }
+
+    public EventType getEventType() {return eventType;}
+
     //--------------------------------------METHODS-------------------------------------------------
 
     //A METHOD FOR EACH SUBCLASS THAT ADDS PEOPLE TO THE ATTENDANCE LIST AS LONG AS THE EVENT IS NOT FULL ON CAPACITY
     //PRECONDITION: ANY [PERSON] AND ADDS THEM TO THE ATTENDEES ARRAY
-    public void addAttendance(Person guy) {
+    /*public void addAttendance(User guy) {
         if(hasSpace()) {
             attendees[count] = guy;
             count++;
@@ -100,7 +107,6 @@ public abstract class Event {
     public boolean hasSpace() {
         if (count < capacity) return true;
         return false;
-    }
+    }*/
 
 }
-

@@ -1,12 +1,14 @@
 package org.example;
+import java.time.LocalDateTime;
+
 public class Workshop extends Event{
 
     private String topic;
 
     //----------------------------------CONSTRUCTOR--------------------------------------------------
 
-    public Workshop(int id, String title, String date, int time, String location, int capacity, String topic) {
-        super(id, title, date, time, location, capacity);
+    public Workshop(String id, String title, LocalDateTime dateTime, String location, int capacity, String topic) {
+        super(id, title, dateTime, location, capacity, EventType.WORKSHOP);
         setTopic(topic);
     }
 
