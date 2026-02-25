@@ -74,7 +74,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Label fx:id="MenuBack" layoutX="18.0" layoutY="52.0" text="MENU">
+                  <Label fx:id="MenuBack" layoutX="18.0" layoutY="52.0" onMouseClicked="#toggleSidebar" text="MENU">
                      <graphic>
                         <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -90,7 +90,7 @@
             </AnchorPane>
          </top>
          <left>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #032d4d;" BorderPane.alignment="CENTER">
+            <AnchorPane fx:id="sidebarContainer" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #032d4d;" BorderPane.alignment="CENTER">
                <children>
                   <VBox fx:id="sidebar" layoutY="36.0" prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
                      <children>
