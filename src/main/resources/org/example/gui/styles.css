@@ -1,0 +1,38 @@
+/* --- 1. PROVE IT IS WORKING --- */
+.root {
+    -fx-background-color: white !important;
+}
+
+/* --- 2. SIDEBAR (The VBox) --- */
+/* This targets the VBox background */
+.sidebar {
+    -fx-background-color: #032d4d !important;
+}
+
+/* This targets EVERY button inside the VBox automatically */
+.sidebar .button {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-cursor: hand !important;
+}
+
+.sidebar .button:hover {
+    -fx-background-color: #054a7d !important;
+    -fx-border-color: #ffffff !important;
+    -fx-border-width: 0 0 0 4 !important;
+}
+
+/* --- 3. TOP BAR (The HBox) --- */
+/* This targets EVERY button inside the toplabel HBox automatically */
+.toplabel .button {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: black !important;
+    -fx-font-weight: bold !important;
+    -fx-cursor: hand !important;
+}
+
+.toplabel .button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1) !important;
+}
+

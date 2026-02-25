@@ -1,51 +1,42 @@
 package org.example.gui;
-
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.layout.StackPane;
-import java.io.IOException;
+//import javafx.fxml.Initializable;
+import javafx.scene.input.MouseEvent; // MUST BE THIS ONE
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox; // Need this for the sidebar variable
+import javafx.util.Duration;
+
 
 public class HelloController {
 
-    @FXML
-    private StackPane contentArea; // Must match the fx:id of the center area in your FXML
+@FXML
+private VBox sidebar;
+    private boolean isExpanded = true;
 
-    /**
-     * Helper method to swap the center view.
-     */
-    private void loadView(String fxmlFile) {
-        try {
-            Parent view = FXMLLoader.load(getClass().getResource(fxmlFile));
-            contentArea.getChildren().setAll(view);
-        } catch (IOException e) {
-            System.err.println("Error: Could not load " + fxmlFile);
-            e.printStackTrace();
+    @FXML
+    private void toggleSidebar() {
+        TranslateTransition slide = new TranslateTransition();
+        slide.setDuration(Duration.seconds(0.4));
+        slide.setNode(sidebar);
+
+        if (isExpanded) {
+            // Slide it out of view to the left
+            slide.setToX(-150); // Adjust based on your sidebar width
+            slide.play();
+            isExpanded = false;
+        } else {
+            // Slide it back to position 0
+            slide.setToX(0);
+            slide.play();
+            isExpanded = true;
         }
     }
 
     @FXML
-    private void onUserManagementClick() {
-        System.out.println("Navigating to User Management...");
-        // Once we create user-view.fxml, we will uncomment the line below:
-        // loadView("user-view.fxml");
-    }
-
-    @FXML
-    private void onEventManagementClick() {
-        System.out.println("Navigating to Event Management...");
-        // loadView("event-view.fxml");
-    }
-
-    @FXML
-    private void onBookingClick() {
-        System.out.println("Navigating to Booking Management...");
-        // loadView("booking-view.fxml");
-    }
-
-    @FXML
-    private void onWaitlistClick() {
-        System.out.println("Navigating to Waitlist Management...");
-        // loadView("waitlist-view.fxml");
+    void closeApplication(MouseEvent event) {
+        Platform.exit(); // Call it directly
+        System.exit(0);
     }
 }
