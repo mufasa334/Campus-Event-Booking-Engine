@@ -13,7 +13,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.gui.HelloController">
    <children>
-      <BorderPane layoutX="157.0" layoutY="90.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane layoutX="157.0" layoutY="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
             <AnchorPane prefHeight="60.0" prefWidth="200.0" style="-fx-background-color: WHITE;" BorderPane.alignment="CENTER">
                <children>
@@ -90,7 +90,7 @@
             </AnchorPane>
          </top>
          <left>
-            <AnchorPane fx:id="sidebarContainer" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #032d4d;" BorderPane.alignment="CENTER">
+            <AnchorPane fx:id="sidebarContainer" maxWidth="200.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #032d4d;" BorderPane.alignment="CENTER">
                <children>
                   <VBox fx:id="sidebar" layoutY="36.0" prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
                      <children>
@@ -145,7 +145,7 @@
             </AnchorPane>
          </left>
          <center>
-            <AnchorPane fx:id="contentArea" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+            <AnchorPane fx:id="contentArea" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER" />
          </center>
       </BorderPane>
    </children>
