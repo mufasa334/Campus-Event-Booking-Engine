@@ -117,7 +117,7 @@
                                  </image></ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" prefHeight="38.0" prefWidth="204.0" text="Bookings">
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showBookingsManagement" prefHeight="38.0" prefWidth="204.0" text="Bookings">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>

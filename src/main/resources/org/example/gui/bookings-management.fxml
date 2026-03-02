@@ -5,7 +5,6 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -19,28 +18,19 @@
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <TextField fx:id="idField" promptText="Event ID" />
-                  <TextField fx:id="nameField" promptText="Title" />
-                  <TextField fx:id="emailField" promptText="Location" />
-                  <TextField fx:id="idField1" promptText="Capacity" />
-                  <TextField fx:id="idField11" promptText="Date/Time" />
-                  <TextField fx:id="idField111" promptText="Topic/Speaker/Age" />
-                  <ComboBox fx:id="roleComboBox" promptText="Event Type" />
-                  <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Add-User" />
+                  <ComboBox prefWidth="150.0" promptText="Select User" />
+                  <ComboBox prefWidth="150.0" promptText="Select Event" />
+                  <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Book Event" />
+                  <Button fx:id="addUser1" mnemonicParsing="false" prefHeight="25.0" text="Cancel Booking" />
                </children>
             </HBox>
             <TableView fx:id="userTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="ID" />
-                <TableColumn prefWidth="75.0" text="Title" />
-                  <TableColumn prefWidth="75.0" text="Date/Time" />
-                  <TableColumn prefWidth="75.0" text="Location" />
-                  <TableColumn prefWidth="75.0" text="Capacity" />
+                <TableColumn prefWidth="75.0" text="Booking ID" />
+                <TableColumn prefWidth="75.0" text="User ID" />
+                  <TableColumn prefWidth="75.0" text="Event ID" />
+                  <TableColumn prefWidth="75.0" text="Created At" />
                   <TableColumn prefWidth="75.0" text="Status" />
-                  <TableColumn prefWidth="75.0" text="Type" />
-                  <TableColumn prefWidth="75.0" text="Topic" />
-                  <TableColumn prefWidth="75.0" text="Speaker" />
-                  <TableColumn prefWidth="75.0" text="AgeRestriction" />
               </columns>
             </TableView>
          </children>
