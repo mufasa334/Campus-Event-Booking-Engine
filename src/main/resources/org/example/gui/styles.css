@@ -1,0 +1,144 @@
+/* =======================================================
+   1. GLOBAL "JMETRO" STYLE RESET (The Foundation)
+   ======================================================= */
+.root {
+    -fx-font-family: "Segoe UI", "Open Sans", Helvetica, Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #f9f9f9 !important;
+    -fx-focus-color: #032d4d;
+    -fx-faint-focus-color: transparent;
+}
+
+.label {
+    -fx-text-fill: #2b2b2b;
+}
+
+.pane, .anchor-pane, .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+/* Sleek Scrollbars */
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: #cccccc;
+    -fx-background-radius: 5;
+}
+.scroll-bar:vertical .thumb:hover, .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #999999;
+}
+
+/* =======================================================
+   2. SIDEBAR & TOP BAR (Your Custom Layout)
+   ======================================================= */
+.sidebar {
+    -fx-background-color: #032d4d !important;
+}
+
+.sidebar .button {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: white !important;
+    -fx-font-weight: bold !important;
+    -fx-cursor: hand !important;
+}
+
+.sidebar .button:hover {
+    -fx-background-color: #054a7d !important;
+    -fx-border-color: #ffffff !important;
+    -fx-border-width: 0 0 0 4 !important;
+}
+
+.toplabel .button {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: black !important;
+    -fx-font-weight: bold !important;
+    -fx-cursor: hand !important;
+}
+
+.toplabel .button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* =======================================================
+   3. GENERAL BUTTONS, INPUTS & DROPDOWNS
+   ======================================================= */
+.button {
+    -fx-background-color: #032d4d;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #054a7d;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.text-field, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 4 8 4 8;
+}
+
+.text-field:focused, .combo-box:focused {
+    -fx-border-color: #032d4d;
+    -fx-border-width: 2;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+}
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: black;
+}
+
+/* =======================================================
+   4. TABLE VIEW
+   ======================================================= */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f4f4f4;
+    -fx-background-radius: 5 5 0 0;
+    -fx-border-color: transparent transparent #cccccc transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-alignment: center-left;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-cell-size: 35px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafafa;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #e6f2ff;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #032d4d;
+    -fx-text-fill: white;
+}

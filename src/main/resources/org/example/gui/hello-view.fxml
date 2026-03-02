@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="1050.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.gui.HelloController">
+   <children>
+      <BorderPane layoutX="157.0" layoutY="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <AnchorPane prefHeight="60.0" prefWidth="200.0" style="-fx-background-color: WHITE;" BorderPane.alignment="CENTER">
+               <children>
+                  <Pane prefHeight="33.0" prefWidth="700.0" style="-fx-background-color: #032d4d;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                     <children>
+                        <ImageView fitHeight="24.0" fitWidth="32.0" layoutX="1023.0" layoutY="5.0" onMouseClicked="#closeApplication" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/icons8-exit-button-48.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <HBox fx:id="toplabel" layoutX="199.0" layoutY="32.0" prefHeight="57.0" prefWidth="501.0" styleClass="toplabel" AnchorPane.leftAnchor="199.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
+                     <children>
+                        <Label prefHeight="150.0" prefWidth="616.0" text="  Campus Event Booking System.">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="54.0" fitWidth="41.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/icons8-logo-50.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Label layoutX="18.0" layoutY="53.0" text="MENU">
+                     <graphic>
+                        <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/icons8-menu-50.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="MenuBack" layoutX="18.0" layoutY="52.0" onMouseClicked="#toggleSidebar" text="MENU">
+                     <graphic>
+                        <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/icons8-menu-50.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </top>
+         <left>
+            <AnchorPane fx:id="sidebarContainer" maxWidth="200.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #032d4d;" BorderPane.alignment="CENTER">
+               <children>
+                  <VBox fx:id="sidebar" layoutY="36.0" prefHeight="200.0" prefWidth="100.0" spacing="25.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
+                     <children>
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showUserManagement" prefHeight="38.0" prefWidth="204.0" text="Users">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/icons8-user-50.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showEventsManagement" prefHeight="38.0" prefWidth="204.0" text="Events">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/icons8-event-48.png" />
+                                 </image></ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showBookingsManagement" prefHeight="38.0" prefWidth="204.0" text="Bookings">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/icons8-booking-50.png" />
+                                 </image></ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showWaitlistsManagement" prefHeight="38.0" prefWidth="204.0" text="Waitlists">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@images/icons8-queue-50.png" />
+                                 </image></ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </left>
+         <center>
+            <AnchorPane fx:id="contentArea" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>
