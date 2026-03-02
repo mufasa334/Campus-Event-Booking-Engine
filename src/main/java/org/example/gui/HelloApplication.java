@@ -34,7 +34,7 @@ public class HelloApplication extends Application {
         });
 
         // 2. Load it once and set the size to 700x400 immediately
-        Scene scene = new Scene(root, 700, 400);
+        Scene scene = new Scene(root, 1050, 550);
         String css = this.getClass().getResource("/org/example/gui/styles.css").toExternalForm();
         scene.getStylesheets().add(css);
 

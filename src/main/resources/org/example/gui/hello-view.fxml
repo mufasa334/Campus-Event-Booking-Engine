@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.gui.HelloController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="1050.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.gui.HelloController">
    <children>
       <BorderPane layoutX="157.0" layoutY="90.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
@@ -19,7 +19,7 @@
                <children>
                   <Pane prefHeight="33.0" prefWidth="700.0" style="-fx-background-color: #032d4d;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                      <children>
-                        <ImageView fitHeight="24.0" fitWidth="32.0" layoutX="674.0" layoutY="5.0" onMouseClicked="#closeApplication" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="24.0" fitWidth="32.0" layoutX="1023.0" layoutY="5.0" onMouseClicked="#closeApplication" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@images/icons8-exit-button-48.png" />
                            </image>
@@ -106,7 +106,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" prefHeight="38.0" prefWidth="204.0" text="Events">
+                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showEventsManagement" prefHeight="38.0" prefWidth="204.0" text="Events">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>

@@ -87,6 +87,39 @@ public class HelloController implements Initializable {
         }
     }
 
+
+
+    @FXML
+    private void showEventsManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("events-management.fxml"));
+            Node view = loader.load();
+
+            if (contentArea instanceof AnchorPane) {
+                AnchorPane pane = (AnchorPane) contentArea;
+                pane.getChildren().setAll(view);
+
+                // Forces the screen to stretch and fit the middle space perfectly
+                if (view instanceof Region) {
+                    Region region = (Region) view;
+                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                    region.setMaxWidth(Double.MAX_VALUE);
+                    region.setMaxHeight(Double.MAX_VALUE);
+                }
+
+                AnchorPane.setTopAnchor(view, 0.0);
+                AnchorPane.setBottomAnchor(view, 0.0);
+                AnchorPane.setLeftAnchor(view, 0.0);
+                AnchorPane.setRightAnchor(view, 0.0);
+            }
+            System.out.println("Events Management Loaded.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @FXML
     void closeApplication(MouseEvent event) {
         Platform.exit();
