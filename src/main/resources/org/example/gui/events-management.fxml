@@ -25,7 +25,7 @@
                   <TextField fx:id="idField1" promptText="Capacity" />
                   <TextField fx:id="idField11" promptText="Date/Time" />
                   <TextField fx:id="idField111" promptText="Topic/Speaker/Age" />
-                  <ComboBox fx:id="roleComboBox" promptText="Event Type" />
+                  <ComboBox fx:id="eventTypeDropdown" promptText="Event Type" />
                   <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Add-User" />
                </children>
             </HBox>

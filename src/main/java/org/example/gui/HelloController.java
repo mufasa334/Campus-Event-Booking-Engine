@@ -32,14 +32,23 @@ public class HelloController implements Initializable {
     @FXML
     private ComboBox<String> roleComboBox; // Matches your fx:id in Scene Builder
 
+    @FXML
+    private ComboBox<String> eventTypeDropdown;
+
     private boolean isExpanded = true;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // This fills the dropdown with the roles required for Phase 1 [cite: 11, 137-138]
+        // This fills the User dropdown [cite: 11]
         if (roleComboBox != null) {
             ObservableList<String> roles = FXCollections.observableArrayList("Student", "Staff", "Guest");
             roleComboBox.setItems(roles);
+        }
+
+        // This fills the Events dropdown [cite: 22, 142]
+        if (eventTypeDropdown != null) {
+            ObservableList<String> eventTypes = FXCollections.observableArrayList("Workshop", "Seminar", "Concert");
+            eventTypeDropdown.setItems(eventTypes);
         }
     }
 
@@ -146,6 +155,37 @@ public class HelloController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void showWaitlistsManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("waitlists-management.fxml"));
+            Node view = loader.load();
+
+            if (contentArea instanceof AnchorPane) {
+                AnchorPane pane = (AnchorPane) contentArea;
+                pane.getChildren().setAll(view);
+
+                // Forces the screen to stretch and fit the middle space perfectly
+                if (view instanceof Region) {
+                    Region region = (Region) view;
+                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                    region.setMaxWidth(Double.MAX_VALUE);
+                    region.setMaxHeight(Double.MAX_VALUE);
+                }
+
+                AnchorPane.setTopAnchor(view, 0.0);
+                AnchorPane.setBottomAnchor(view, 0.0);
+                AnchorPane.setLeftAnchor(view, 0.0);
+                AnchorPane.setRightAnchor(view, 0.0);
+            }
+            System.out.println("Waitlists Management Loaded.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @FXML
     void closeApplication(MouseEvent event) {
