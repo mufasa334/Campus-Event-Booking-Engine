@@ -1,56 +1,63 @@
 package org.example.gui;
 
-import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader; // Added this import
-import javafx.scene.Node;      // Added this import
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.util.Duration;
-import java.io.IOException;    // Added this import
-import javafx.scene.layout.Region;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.ComboBox; // Important: Added this!
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
+import javafx.util.Duration;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class HelloController {
+// Just ONE class line that implements Initializable
+public class HelloController implements Initializable {
 
     @FXML
     private AnchorPane sidebarContainer;
 
     @FXML
-    private Node contentArea; // Changed from AnchorPane to Node for safety
+    private Node contentArea;
+
+    @FXML
+    private ComboBox<String> roleComboBox; // Matches your fx:id in Scene Builder
 
     private boolean isExpanded = true;
 
-    // --- SIDEBAR LOGIC ---
-    // --- SIDEBAR LOGIC ---
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        // This fills the dropdown with the roles required for Phase 1 [cite: 11, 137-138]
+        if (roleComboBox != null) {
+            ObservableList<String> roles = FXCollections.observableArrayList("Student", "Staff", "Guest");
+            roleComboBox.setItems(roles);
+        }
+    }
+
     @FXML
     private void toggleSidebar() {
-        // We'll animate the width from 200 to 0 (or back)
         double targetWidth = isExpanded ? 0 : 200;
-
-        // Create a smooth timeline animation (0.4 seconds)
         Timeline timeline = new Timeline();
-
-        // This animates the actual width property of the sidebar
         KeyValue widthValue = new KeyValue(sidebarContainer.prefWidthProperty(), targetWidth);
         KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.4), widthValue);
-
         timeline.getKeyFrames().add(keyFrame);
 
-        // Toggle the state and play
         isExpanded = !isExpanded;
         timeline.play();
 
-        // Optional: If you still want the "sliding" look, keep the TranslateX too
         TranslateTransition slide = new TranslateTransition(Duration.seconds(0.4), sidebarContainer);
         slide.setToX(isExpanded ? 0 : -200);
         slide.play();
     }
-
-    // Add this import at the very top of HelloController.java
 
     @FXML
     private void showUserManagement() {
@@ -62,33 +69,27 @@ public class HelloController {
                 AnchorPane pane = (AnchorPane) contentArea;
                 pane.getChildren().setAll(view);
 
-                // This forces the "Lego piece" to be elastic regardless of Scene Builder settings
                 if (view instanceof Region) {
                     Region region = (Region) view;
                     region.setPrefWidth(Region.USE_COMPUTED_SIZE);
                     region.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    region.setMaxWidth(Double.MAX_VALUE); // No max width limit
-                    region.setMaxHeight(Double.MAX_VALUE); // No max height limit
+                    region.setMaxWidth(Double.MAX_VALUE);
+                    region.setMaxHeight(Double.MAX_VALUE);
                 }
 
-                // Pins the view to the corners of the contentArea
                 AnchorPane.setTopAnchor(view, 0.0);
                 AnchorPane.setBottomAnchor(view, 0.0);
                 AnchorPane.setLeftAnchor(view, 0.0);
                 AnchorPane.setRightAnchor(view, 0.0);
             }
-            System.out.println("User Management Loaded - Forced Elasticity Enabled.");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // --- EXIT LOGIC ---
     @FXML
     void closeApplication(MouseEvent event) {
         Platform.exit();
         System.exit(0);
     }
-
 }
-
