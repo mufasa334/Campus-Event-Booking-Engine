@@ -28,7 +28,7 @@
             </HBox>
             <TableView fx:id="userTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="User ID" />
+                <TableColumn prefWidth="75.0" text="  User ID" />
                 <TableColumn prefWidth="75.0" text="Name" />
                   <TableColumn prefWidth="75.0" text="Email" />
                   <TableColumn prefWidth="75.0" text="Type" />

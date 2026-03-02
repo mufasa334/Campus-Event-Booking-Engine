@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
@@ -28,38 +29,21 @@
                   </Pane>
                   <HBox fx:id="toplabel" layoutX="199.0" layoutY="32.0" prefHeight="57.0" prefWidth="501.0" styleClass="toplabel" AnchorPane.leftAnchor="199.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
                      <children>
-                        <Button fx:id="topbtn" mnemonicParsing="false" prefHeight="57.0" prefWidth="130.0" text="Users">
+                        <Label prefHeight="150.0" prefWidth="616.0" text="  Campus Event Booking System.">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
                            <graphic>
-                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="54.0" fitWidth="41.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@images/icons8-user-50.png" />
-                                 </image></ImageView>
+                                    <Image url="@images/icons8-logo-50.png" />
+                                 </image>
+                              </ImageView>
                            </graphic>
-                        </Button>
-                        <Button fx:id="topbtn" mnemonicParsing="false" prefHeight="57.0" prefWidth="130.0" text="Events">
-                           <graphic>
-                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/icons8-event-48.png" />
-                                 </image></ImageView>
-                           </graphic>
-                        </Button>
-                        <Button fx:id="topbtn" mnemonicParsing="false" prefHeight="57.0" prefWidth="130.0" text="Bookings">
-                           <graphic>
-                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/icons8-booking-50.png" />
-                                 </image></ImageView>
-                           </graphic>
-                        </Button>
-                        <Button fx:id="topbtn" mnemonicParsing="false" prefHeight="57.0" prefWidth="130.0" text="Waitlists">
-                           <graphic>
-                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@images/icons8-queue-50.png" />
-                                 </image></ImageView>
-                           </graphic>
-                        </Button>
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                        </Label>
                      </children>
                   </HBox>
                   <Label layoutX="18.0" layoutY="53.0" text="MENU">

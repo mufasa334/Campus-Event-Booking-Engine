@@ -26,12 +26,15 @@
             </HBox>
             <TableView fx:id="userTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
               <columns>
-                <TableColumn prefWidth="75.0" text="Booking ID" />
+                <TableColumn prefWidth="75.0" text="  Booking ID" />
                 <TableColumn prefWidth="75.0" text="User ID" />
                   <TableColumn prefWidth="75.0" text="Event ID" />
                   <TableColumn prefWidth="75.0" text="Created At" />
                   <TableColumn prefWidth="75.0" text="Status" />
               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
             </TableView>
          </children>
       </VBox>
