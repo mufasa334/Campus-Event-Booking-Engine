@@ -12,7 +12,7 @@ public class Launcher {
     int choice = 0, eventCounter = 0, userCounter = 0;
 
 
-    while(choice != 4) { //make choice take in stiff from the gui
+    while(choice != 5) { //make choice take in stiff from the gui
 
         // 1 = make event, 2 - make user, 3 - boooking, 4 -  exit app
         switch(choice) {
@@ -58,9 +58,13 @@ public class Launcher {
 
             case 3:
 
-                //make the booking work here
+                //add person to booking
 
-                // case 4 should just end it
+            case 4:
+
+                //remove person from booking
+
+                // case 5 should just end it
         }
 
     }
