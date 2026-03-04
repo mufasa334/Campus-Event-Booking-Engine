@@ -1,3 +1,5 @@
+import org.example.BookingWaitlistingManager;
+
 import java.time.LocalDateTime;
 
 public abstract class Event {
@@ -14,6 +16,7 @@ public abstract class Event {
         SEMINAR
     }
 
+    private BookingWaitlistingManager manager;
     private String eventId;
     private int capacity;
     private String location;
@@ -35,6 +38,8 @@ public abstract class Event {
         setCapacity(capacity);
         setStatus(EventStatus.CONFIRMED);
         setEventType(eventType);
+
+        manager = new BookingWaitlistingManager(capacity,eventId,title);
 
         //attendees = new User[capacity];
     }
@@ -88,6 +93,8 @@ public abstract class Event {
     public void setEventType(EventType eventType) { this.eventType = eventType; }
 
     public EventType getEventType() {return eventType;}
+
+    public BookingWaitlistingManager getManager() { return manager; }
 
     //--------------------------------------METHODS-------------------------------------------------
 

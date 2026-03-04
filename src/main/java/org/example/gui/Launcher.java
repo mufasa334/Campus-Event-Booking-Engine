@@ -26,6 +26,7 @@ public class Launcher {
                     case 1:
                         /// Make it ask for parameters here and put it in the brackets
                         events[eventCounter] = new Concert();
+
                         break;
                     case 2:
                         events[eventCounter] = new Seminar();
