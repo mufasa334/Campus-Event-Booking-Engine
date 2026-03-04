@@ -1,3 +1,4 @@
+package org.example.gui;
 public abstract class User {
 
     public enum UserType {

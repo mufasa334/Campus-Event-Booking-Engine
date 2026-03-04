@@ -78,7 +78,7 @@
                <children>
                   <VBox fx:id="sidebar" layoutY="36.0" prefHeight="200.0" prefWidth="100.0" spacing="25.0" styleClass="sidebar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
                      <children>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showUserManagement" prefHeight="38.0" prefWidth="204.0" text="Users">
+                        <Button fx:id="btnUsers" mnemonicParsing="false" onAction="#showUserManagement" prefHeight="38.0" prefWidth="204.0" text="Users">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
@@ -90,7 +90,7 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showEventsManagement" prefHeight="38.0" prefWidth="204.0" text="Events">
+                        <Button fx:id="btnEvents" mnemonicParsing="false" onAction="#showEventsManagement" prefHeight="38.0" prefWidth="204.0" text="Events">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
@@ -101,7 +101,7 @@
                                  </image></ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showBookingsManagement" prefHeight="38.0" prefWidth="204.0" text="Bookings">
+                        <Button fx:id="btnBookings" mnemonicParsing="false" onAction="#showBookingsManagement" prefHeight="38.0" prefWidth="204.0" text="Bookings">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
@@ -112,7 +112,7 @@
                                  </image></ImageView>
                            </graphic>
                         </Button>
-                        <Button fx:id="sidebarbtn" mnemonicParsing="false" onAction="#showWaitlistsManagement" prefHeight="38.0" prefWidth="204.0" text="Waitlists">
+                        <Button fx:id="btnWaitlists" mnemonicParsing="false" onAction="#showWaitlistsManagement" prefHeight="38.0" prefWidth="204.0" text="Waitlists">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>

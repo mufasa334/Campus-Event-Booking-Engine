@@ -1,3 +1,4 @@
+package org.example.gui;
 import java.time.LocalDateTime;
 
 public class Seminar extends Event{

@@ -1,3 +1,4 @@
+package org.example.gui;
 public class Student extends User {
 
     //private Event[] booking = new Event[3];

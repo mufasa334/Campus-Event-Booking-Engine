@@ -1,4 +1,4 @@
-import org.example.BookingWaitlistingManager;
+package org.example.gui;
 
 import java.time.LocalDateTime;
 

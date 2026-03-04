@@ -1,3 +1,4 @@
+package org.example.gui;
 public class Guest extends User {
     //private Event booking;
 

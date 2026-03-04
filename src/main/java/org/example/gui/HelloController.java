@@ -1,195 +1,114 @@
 package org.example.gui;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox; // Important: Added this!
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Region;
-import javafx.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-// Just ONE class line that implements Initializable
 public class HelloController implements Initializable {
 
-    @FXML
-    private AnchorPane sidebarContainer;
+    // PHASE 1 DATA STORAGE
+    private ObservableList<User> allUsers = FXCollections.observableArrayList();
 
-    @FXML
-    private Node contentArea;
+    // THIS MUST MATCH THE ID IN SCENE BUILDER
+    @FXML private AnchorPane contentArea;
 
-    @FXML
-    private ComboBox<String> roleComboBox; // Matches your fx:id in Scene Builder
-
-    @FXML
-    private ComboBox<String> eventTypeDropdown;
-
-    private boolean isExpanded = true;
+    // UI ELEMENTS
+    @FXML private TextField idField, nameField, emailField;
+    @FXML private ComboBox<String> roleComboBox;
+    @FXML private TableView<User> userTable;
+    @FXML private TableColumn<User, String> colUserId, colName, colEmail, colType;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // This fills the User dropdown [cite: 11]
         if (roleComboBox != null) {
-            ObservableList<String> roles = FXCollections.observableArrayList("Student", "Staff", "Guest");
-            roleComboBox.setItems(roles);
+            roleComboBox.setItems(FXCollections.observableArrayList("Student", "Staff", "Guest"));
         }
 
-        // This fills the Events dropdown [cite: 22, 142]
-        if (eventTypeDropdown != null) {
-            ObservableList<String> eventTypes = FXCollections.observableArrayList("Workshop", "Seminar", "Concert");
-            eventTypeDropdown.setItems(eventTypes);
+        // ADDED EXTRA CHECK: Only setup the table if the table AND columns exist
+        if (userTable != null && colUserId != null) {
+            colUserId.setCellValueFactory(new PropertyValueFactory<>("userId"));
+            colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+            colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+            colType.setCellValueFactory(new PropertyValueFactory<>("userType"));
+            userTable.setItems(allUsers);
+        }
+
+        // Load dummy data
+        if (allUsers.isEmpty()) {
+            allUsers.add(new Student("U001", "Alice Smith", "alice@uoguelph.ca"));
+            allUsers.add(new Staff("U002", "Dr. Bob", "bob@uoguelph.ca"));
         }
     }
 
     @FXML
-    private void toggleSidebar() {
-        double targetWidth = isExpanded ? 0 : 200;
-        Timeline timeline = new Timeline();
-        KeyValue widthValue = new KeyValue(sidebarContainer.prefWidthProperty(), targetWidth);
-        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.4), widthValue);
-        timeline.getKeyFrames().add(keyFrame);
+    private void AddUser() {
+        System.out.println("Add User button clicked!");
+        String id = idField.getText();
+        String name = nameField.getText();
+        String email = emailField.getText();
+        String type = roleComboBox.getValue();
 
-        isExpanded = !isExpanded;
-        timeline.play();
+        if (id == null || name == null || type == null || id.isEmpty()) return;
 
-        TranslateTransition slide = new TranslateTransition(Duration.seconds(0.4), sidebarContainer);
-        slide.setToX(isExpanded ? 0 : -200);
-        slide.play();
+        User newUser;
+        if (type.equals("Student")) newUser = new Student(id, name, email);
+        else if (type.equals("Staff")) newUser = new Staff(id, name, email);
+        else newUser = new Guest(id, name, email);
+
+        allUsers.add(newUser);
+        idField.clear(); nameField.clear(); emailField.clear();
     }
 
-    @FXML
-    private void showUserManagement() {
+    // NAVIGATION METHODS
+    @FXML private void showUserManagement() {
+        System.out.println("Switching to User Management...");
+        switchView("user-management.fxml");
+    }
+    @FXML private void showEventsManagement() {
+        System.out.println("Switching to Events...");
+        switchView("events-management.fxml");
+    }
+    @FXML private void showBookingsManagement() {
+        System.out.println("Switching to Bookings...");
+        switchView("bookings-management.fxml");
+    }
+    @FXML private void showWaitlistsManagement() {
+        System.out.println("Switching to Waitlists...");
+        switchView("waitlists-management.fxml");
+    }
+
+    private void switchView(String fxmlFile) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("user-management.fxml"));
-            Node view = loader.load();
-
-            if (contentArea instanceof AnchorPane) {
-                AnchorPane pane = (AnchorPane) contentArea;
-                pane.getChildren().setAll(view);
-
-                if (view instanceof Region) {
-                    Region region = (Region) view;
-                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    region.setMaxWidth(Double.MAX_VALUE);
-                    region.setMaxHeight(Double.MAX_VALUE);
-                }
-
-                AnchorPane.setTopAnchor(view, 0.0);
-                AnchorPane.setBottomAnchor(view, 0.0);
-                AnchorPane.setLeftAnchor(view, 0.0);
-                AnchorPane.setRightAnchor(view, 0.0);
+            // Check if the content area exists
+            if (contentArea == null) {
+                System.err.println("CRITICAL ERROR: contentArea is null! Check fx:id in Scene Builder.");
+                return;
             }
+            Node view = new FXMLLoader(getClass().getResource(fxmlFile)).load();
+            contentArea.getChildren().setAll(view);
+
+            // Auto-stretch
+            AnchorPane.setTopAnchor(view, 0.0); AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0); AnchorPane.setRightAnchor(view, 0.0);
         } catch (IOException e) {
+            System.err.println("Could not load FXML file: " + fxmlFile);
             e.printStackTrace();
         }
     }
 
-    @FXML
-    private void showEventsManagement() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("events-management.fxml"));
-            Node view = loader.load();
+    @FXML private void toggleSidebar(javafx.event.Event event) { }
 
-            if (contentArea instanceof AnchorPane) {
-                AnchorPane pane = (AnchorPane) contentArea;
-                pane.getChildren().setAll(view);
-
-                // Forces the screen to stretch and fit the middle space perfectly
-                if (view instanceof Region) {
-                    Region region = (Region) view;
-                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    region.setMaxWidth(Double.MAX_VALUE);
-                    region.setMaxHeight(Double.MAX_VALUE);
-                }
-
-                AnchorPane.setTopAnchor(view, 0.0);
-                AnchorPane.setBottomAnchor(view, 0.0);
-                AnchorPane.setLeftAnchor(view, 0.0);
-                AnchorPane.setRightAnchor(view, 0.0);
-            }
-            System.out.println("Events Management Loaded.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void showBookingsManagement() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bookings-management.fxml"));
-            Node view = loader.load();
-
-            if (contentArea instanceof AnchorPane) {
-                AnchorPane pane = (AnchorPane) contentArea;
-                pane.getChildren().setAll(view);
-
-                // Forces the screen to stretch and fit the middle space perfectly
-                if (view instanceof Region) {
-                    Region region = (Region) view;
-                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    region.setMaxWidth(Double.MAX_VALUE);
-                    region.setMaxHeight(Double.MAX_VALUE);
-                }
-
-                AnchorPane.setTopAnchor(view, 0.0);
-                AnchorPane.setBottomAnchor(view, 0.0);
-                AnchorPane.setLeftAnchor(view, 0.0);
-                AnchorPane.setRightAnchor(view, 0.0);
-            }
-            System.out.println("Bookings Management Loaded.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void showWaitlistsManagement() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("waitlists-management.fxml"));
-            Node view = loader.load();
-
-            if (contentArea instanceof AnchorPane) {
-                AnchorPane pane = (AnchorPane) contentArea;
-                pane.getChildren().setAll(view);
-
-                // Forces the screen to stretch and fit the middle space perfectly
-                if (view instanceof Region) {
-                    Region region = (Region) view;
-                    region.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                    region.setPrefHeight(Region.USE_COMPUTED_SIZE);
-                    region.setMaxWidth(Double.MAX_VALUE);
-                    region.setMaxHeight(Double.MAX_VALUE);
-                }
-
-                AnchorPane.setTopAnchor(view, 0.0);
-                AnchorPane.setBottomAnchor(view, 0.0);
-                AnchorPane.setLeftAnchor(view, 0.0);
-                AnchorPane.setRightAnchor(view, 0.0);
-            }
-            System.out.println("Waitlists Management Loaded.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @FXML
-    void closeApplication(MouseEvent event) {
-        Platform.exit();
+    @FXML private void closeApplication(javafx.event.Event event) {
+        javafx.application.Platform.exit();
         System.exit(0);
     }
 }
