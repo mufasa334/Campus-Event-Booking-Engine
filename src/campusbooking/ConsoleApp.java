@@ -34,7 +34,12 @@ public class ConsoleApp {
 
                 case 2 -> {
                     for (Event e : system.events().listEvents()) {
-                        System.out.println(e.getEventId() + " " + e.getTitle());
+                        System.out.println(
+                                "ID: " + e.getEventId() +
+                                        " | Title: " + e.getTitle() +
+                                        " | Location: " + e.getLocation() +
+                                        " | Capacity: " + e.getCapacity()
+                        );
                     }
                 }
 
@@ -50,19 +55,31 @@ public class ConsoleApp {
                 }
 
                 case 4 -> {
-                    System.out.print("Booking ID: ");
-                    String bookingId = sc.nextLine();
+                    var bookings = system.bookings().listBookings();
 
-                    system.bookings().cancelBooking(bookingId);
-                    System.out.println("Booking cancelled.");
+                    if (bookings.isEmpty()) {
+                        System.out.println("No bookings available.");
+                    } else {
+                        System.out.print("Booking ID: ");
+                        String bookingId = sc.nextLine();
+
+                        system.bookings().cancelBooking(bookingId);
+                        System.out.println("Booking cancelled.");
+                    }
                 }
 
                 case 5 -> {
-                    for (Booking b : system.bookings().listBookings()) {
-                        System.out.println(b.getBookingId()
-                                + " user=" + b.getUserId()
-                                + " event=" + b.getEventId()
-                                + " status=" + b.getStatus());
+                    var bookings = system.bookings().listBookings();
+
+                    if (bookings.isEmpty()) {
+                        System.out.println("No bookings available.");
+                    } else {
+                        for (Booking b : bookings) {
+                            System.out.println(b.getBookingId()
+                                    + " user=" + b.getUserId()
+                                    + " event=" + b.getEventId()
+                                    + " status=" + b.getStatus());
+                        }
                     }
                 }
 
