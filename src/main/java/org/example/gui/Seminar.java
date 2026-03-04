@@ -7,20 +7,15 @@ public class Seminar extends Event{
 
     //-------------------------------------CONSTRUCTOR------------------------------------------------
 
-    public Seminar(String id, String title, LocalDateTime dateTime, String location, int capacity, String speakerName) {
-        super(id, title, dateTime, location, capacity, EventType.SEMINAR);
-        setSpeakerName(speakerName);
+    public Seminar(String eventId, String title, LocalDateTime dateTime, String location, int capacity, String speakerName) {
+        // Must match the 6-argument constructor in Event.java
+        super(eventId, title, dateTime, location, capacity, EventType.SEMINAR);
+        this.speakerName = speakerName;
     }
 
     //-----------------------------------SETTERS / GETTERS--------------------------------------------
 
-    public void setSpeakerName(String speakerName) {
-        this.speakerName = speakerName;
-    }
-
-    public String getSpeakerName() {
-        return speakerName;
-    }
-
+    public String getSpeakerName() { return speakerName; }
+    public void setSpeakerName(String speakerName) { this.speakerName = speakerName; }
     //----------------------------------------METHODS--------------------------------------------------
 }

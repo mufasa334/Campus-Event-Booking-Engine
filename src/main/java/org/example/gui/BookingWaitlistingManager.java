@@ -113,19 +113,13 @@ public class BookingWaitlistingManager {
     }
 
     //methods
-    public void addUser(String enteredUserName){
-        for (int i = 0; i < (i+1); i++) {
-            if (UserList.get(i) == null){
-                UserList.set(i, enteredUserName);
-                break;
-            }
-            if(enteredUserName.equals(UserList.get(i))) {
-                System.out.println("User Is Already Listed"); //would need to print to UI
-                break;
-            }
+    // Fixed: Changed (i+1) infinite loop to check actual list size
+    public void addUser(String enteredUserName) {
+        if (UserList.contains(enteredUserName)) {
+            System.out.println("User Is Already Listed");
+            return;
         }
-        UserList.add(null);
-
+        UserList.add(enteredUserName);
     }
 
     public void cancelBooking(String enteredUserName){

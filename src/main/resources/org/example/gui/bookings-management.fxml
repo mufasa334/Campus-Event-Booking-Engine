@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.gui.HelloController">
+<AnchorPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox alignment="TOP_CENTER" layoutY="71.0" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <padding>
@@ -18,8 +18,8 @@
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                <children>
-                  <ComboBox prefWidth="150.0" promptText="Select User" />
-                  <ComboBox prefWidth="150.0" promptText="Select Event" />
+                  <ComboBox fx:id="bookingUserSelection" prefWidth="150.0" promptText="Select User" />
+                  <ComboBox fx:id="bookingEventSelection" prefWidth="150.0" promptText="Select Event" />
                   <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Book Event" />
                   <Button fx:id="addUser1" mnemonicParsing="false" prefHeight="25.0" text="Cancel Booking" />
                </children>

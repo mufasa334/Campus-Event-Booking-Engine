@@ -7,21 +7,16 @@ public class Concert extends Event{
 
     //------------------------------------CONSTRUCTOR------------------------------------------------
 
-    public Concert(String id, String title, LocalDateTime dateTime, String location, int capacity, String ageRestriction) {
-
-        super(id, title, dateTime, location, capacity, EventType.CONCERT);
-        setAgeRestriction(ageRestriction);
+    public Concert(String eventId, String title, LocalDateTime dateTime, String location, int capacity, String ageRestriction) {
+        // Must match the 6-argument constructor in Event.java
+        super(eventId, title, dateTime, location, capacity, EventType.CONCERT);
+        this.ageRestriction = ageRestriction;
     }
 
     //----------------------------------SETTERS / GETTERS-------------------------------------------
 
-    public void setAgeRestriction(String ageRestriction) {
-        this.ageRestriction = ageRestriction;
-    }
-
-    public String getAgeRestriction() {
-        return ageRestriction;
-    }
+    public String getAgeRestriction() { return ageRestriction; }
+    public void setAgeRestriction(String ageRestriction) { this.ageRestriction = ageRestriction; }
 
     //---------------------------------------METHODS---------------------------------------------------
 }
