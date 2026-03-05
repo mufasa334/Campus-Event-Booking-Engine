@@ -64,10 +64,19 @@ public class MyGUI {
             JTextField booker = new JTextField(15);
             JTextArea display3 = new JTextArea(40,60);
 
+            //cancelling
+            JPanel cancelling = new JPanel();
+            JButton button4 = new JButton("Confirm");
+            JLabel output4 = new JLabel("                                                                                                                                                        NUMBER OF BOOKING TO DELETE                                                                                                                                                                                                                                 ");
+            JTextField bookee2 = new JTextField(15);
+            JTextField booker2 = new JTextField(15);
+            JTextArea display4 = new JTextArea(40,60);
+
 
             display.setText(sbUser.toString());
             display2.setText(sbEvent.toString());
             display3.setText(sbBooker.toString());
+            display4.setText(sbBooker.toString());
 
             button.addActionListener(e -> {
                 if(type.getText().equals("Guest")) {
@@ -116,21 +125,48 @@ public class MyGUI {
 
             button3.addActionListener(e -> {
                 int j = 0, k = 0;
+                boolean work = false, work2 = false;
 
                 for(int i = 0; i < ucount[0]; i++) {
-                    if(bookee.getText().equals(people[i].getName())) j = i;
+                    if(bookee.getText().equals(people[i].getName())) {
+                        j = i;
+                        work = true;
+                    }
                 }
 
                 for(int i = 0; i < ecount[0]; i++) {
-                    if(booker.getText().equals(funs[i].getTitle())) k = i;
+                    if(booker.getText().equals(funs[i].getTitle())) {
+                        k = i;
+                        work2 = true;
+                    }
                 }
 
-                funs[j].getManager().addUser(people[k].getName());
-                sbBooker.append(String.format("%-30s",people[j].getName()));
-                sbBooker.append(String.format("%-30s",funs[k].getTitle()));
-                sbBooker.append(String.format("%-30s","Confirmed"));
-                sbBooker.append("\n");
+                if(work && work2) {
+                    funs[j].getManager().addUser(people[k].getName());
+                    sbBooker.append(String.format("%-30s", people[j].getName()));
+                    sbBooker.append(String.format("%-30s", funs[k].getTitle()));
+                    sbBooker.append(String.format("%-30s", "Confirmed"));
+                    sbBooker.append("\n");
+                    display3.setText(sbBooker.toString());
+                    display4.setText(sbBooker.toString());
+                }
+            });
+
+            button4.addActionListener(e -> {
+                int index1 = 0, index2 = 0, count = 0;
+
+                for(int i = 0; i < sbBooker.length(); i++) {
+
+                    if(sbBooker.charAt(i) == '\n') {
+                        count++;
+                        if(count == Integer.parseInt(bookee2.getText()) + 1) { index1 = i; }
+                        else if(count == Integer.parseInt(bookee2.getText()) + 2) { index2 = i; }
+                    }
+                }
+
+                sbBooker.replace(index1,index2,"");
                 display3.setText(sbBooker.toString());
+                display4.setText(sbBooker.toString());
             });
 
             users.setLayout(new java.awt.FlowLayout());
@@ -160,10 +196,17 @@ public class MyGUI {
             booking.add(button3);
             booking.add(display3);
 
+            cancelling.setLayout(new java.awt.FlowLayout());
+            cancelling.add(output4);
+            cancelling.add(bookee2);
+            cancelling.add(button4);
+            cancelling.add(display4);
+
 
             tabs.addTab("Users", users);
             tabs.addTab("Events", events);
             tabs.addTab("Booking", booking);
+            tabs.addTab("Cancelling", cancelling);
 
             frame.add(tabs);
 
