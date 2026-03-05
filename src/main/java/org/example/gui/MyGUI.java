@@ -19,6 +19,7 @@ public class MyGUI {
             int[] ucount = new int[1];
             int[] ecount = new int[1];
 
+            //Setup for all 3 StringBuilders
             StringBuilder sbUser = new StringBuilder();
             sbUser.append(String.format("%-30s %-30s %-30s %-30s%n", "ID", "NAME", "EMAIL", "TYPE"));
             sbUser.append("------------------------------------------------------------------------------------------\n");
@@ -72,12 +73,13 @@ public class MyGUI {
             JTextField booker2 = new JTextField(15);
             JTextArea display4 = new JTextArea(40,60);
 
-
+            //setup for the display boxes
             display.setText(sbUser.toString());
             display2.setText(sbEvent.toString());
             display3.setText(sbBooker.toString());
             display4.setText(sbBooker.toString());
 
+            //when this button is pressed, create a user class with the stuff in the boxes
             button.addActionListener(e -> {
                 if(type.getText().equals("Guest")) {
                     people[ucount[0]] = new Guest(userID.getText(), name.getText(), email.getText());
@@ -99,6 +101,7 @@ public class MyGUI {
                 display.setText(sbUser.toString());
             });
 
+            //When this button is pressed, create an event class with the stuff in the boxes
             button2.addActionListener(e -> {
                 if(etype.getText().equals("Concert")) {
                     funs[ecount[0]] = new Concert(eventID.getText(), title.getText(), LocalDateTime.parse(date.getText()), location.getText(), Integer.parseInt(capacity.getText()), etype.getText());
@@ -123,6 +126,7 @@ public class MyGUI {
 
             });
 
+            //When this button is pressed, go through and find the user and event and book them together
             button3.addActionListener(e -> {
                 int j = 0, k = 0;
                 boolean work = false, work2 = false;
@@ -152,6 +156,7 @@ public class MyGUI {
                 }
             });
 
+            //when this button is pressed, go through and delete the booking at that number (top to bot)
             button4.addActionListener(e -> {
                 int index1 = 0, index2 = 0, count = 0;
 
@@ -169,6 +174,7 @@ public class MyGUI {
                 display4.setText(sbBooker.toString());
             });
 
+            //formatting the users tab
             users.setLayout(new java.awt.FlowLayout());
             users.add(output);
             users.add(userID);
@@ -178,6 +184,7 @@ public class MyGUI {
             users.add(button);
             users.add(display);
 
+            //formatting the events tab
             events.setLayout(new java.awt.FlowLayout());
             events.add(output2);
             events.add(eventID);
@@ -189,6 +196,7 @@ public class MyGUI {
             events.add(button2);
             events.add(display2);
 
+            //formatting the booking tab
             booking.setLayout(new java.awt.FlowLayout());
             booking.add(output3);
             booking.add(bookee);
@@ -196,21 +204,19 @@ public class MyGUI {
             booking.add(button3);
             booking.add(display3);
 
+            //formatting the cancelling tab
             cancelling.setLayout(new java.awt.FlowLayout());
             cancelling.add(output4);
             cancelling.add(bookee2);
             cancelling.add(button4);
             cancelling.add(display4);
 
-
+            //Putting the tabs in the frame
             tabs.addTab("Users", users);
             tabs.addTab("Events", events);
             tabs.addTab("Booking", booking);
             tabs.addTab("Cancelling", cancelling);
-
             frame.add(tabs);
-
-
             frame.setVisible(true);
         });
     }
