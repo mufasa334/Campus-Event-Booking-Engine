@@ -21,10 +21,10 @@ public class CampusEventBookingSystem {
 
     public void loadSampleData() {
 
-        userManager.addUser(new User("U1:","Alice","alice@guelph.ca"));
-        userManager.addUser(new User("U2:","Bob","bob@guelph.ca"));
+        userManager.addUser(new User("U1","Alice","alice@guelph.ca"));
+        userManager.addUser(new User("U2","Bob","bob@guelph.ca"));
 
-        eventManager.addEvent(new Event("E1:","Java Workshop","SSC",20));
-        eventManager.addEvent(new Event("E2:","AI Seminar","THRN",30));
+        eventManager.addEvent(new Event("E1","Java Workshop","SSC",20));
+        eventManager.addEvent(new Event("E2","AI Seminar","THRN",30));
     }
 }
