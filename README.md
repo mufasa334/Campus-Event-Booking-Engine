@@ -1,26 +1,32 @@
-# ENGG*1420 Final Project: Campus Event Booking Engine (Phase 1)
+Campus Event Management Suite 🗓️
+Enterprise-Grade Logic for Academic Logistics
 
-### Project Status
-This repository contains our Phase 1 submission for the Campus Event Booking System. The current build demonstrates the core object-oriented architecture required for the project, including inheritance, encapsulation, and our foundational JavaFX graphical interface. 
+📖 Overview
+The Campus Event Management Suite is a full-stack Object-Oriented application designed to streamline event scheduling, user registration, and facility management. Built with a focus on strict Model-View-Controller (MVC) design patterns, this system ensures high data integrity and real-time state synchronization across multiple user types.
 
-### Phase 1 Architecture
-Instead of a database, Phase 1 currently relies on in-memory collections to manage state while we prove our class logic. Our backend structures include:
-* **User Models:** A base `User` class extended by `Student`, `Staff`, and `Guest`.
-* **Event Models:** Subclasses for `Workshop`, `Seminar`, and `Concert`, each designed to handle unique data fields like speaker names or age restrictions.
-* **Booking State:** Initial groundwork for tracking `Confirmed`, `Waitlisted`, and `Cancelled` reservations.
-* **Data Loader:** A utility that reads users.csv, events.csv, and bookings.csv from the src/main/resources/data/ directory upon initialization.
-* **Interface:** A functional JavaFX dashboard that allows admins to navigate between management screens and view user data in a TableView.
+⚡ Core Architecture
+Modular OOP Design: Utilizes complex inheritance and polymorphism to manage diverse entities, including specialized User roles (Student, Staff) and Event types (Seminar, Workshop, Concert).
 
----
+Real-Time Data Binding: Powered by JavaFX ObservableList and TableView to guarantee that the UI reflects the current state of the in-memory database instantly.
 
-### Setup and Execution Guide
-To evaluate the GUI and Phase 1 logic, please follow these compilation steps:
+Automated Data Pipeline: Includes a robust DataLoader utility that parses flat-file datasets (CSV) to automatically hydrate the system's class hierarchies upon startup.
 
-1. Download or clone this repository to your local machine.
-2. Open IntelliJ IDEA and load the inner `Campus-Event-Booking-Engine` directory as your project.
-3. Allow Maven a moment to sync and download the required JavaFX libraries from the `pom.xml`.
-4. In your project tree, navigate to the main entry point:  
-   `src/main/java/org/example/gui/Launcher.java`
-5. Run the `main` method inside `Launcher.java`. 
+State Persistence Logic: Manages complex booking states (Confirmed, Waitlisted, Cancelled) using optimized Java Collections for low-latency retrieval.
 
-The primary application window will launch, and you can use the sidebar to navigate the Phase 1 UI.
+🛠️ Tech Stack
+Language: Java 21
+
+Framework: JavaFX (GUI & Data Binding)
+
+Architecture: Model-View-Controller (MVC)
+
+Dependency Management: Maven
+
+💻 Execution & Setup
+Clone the repository to your local environment.
+
+Open the project in IntelliJ IDEA.
+
+Navigate to src/main/java/org/example/gui/Launcher.java.
+
+Run the main method to initialize the dashboard.
