@@ -8,7 +8,7 @@ Instead of a database, Phase 1 currently relies on in-memory collections to mana
 * **User Models:** A base `User` class extended by `Student`, `Staff`, and `Guest`.
 * **Event Models:** Subclasses for `Workshop`, `Seminar`, and `Concert`, each designed to handle unique data fields like speaker names or age restrictions.
 * **Booking State:** Initial groundwork for tracking `Confirmed`, `Waitlisted`, and `Cancelled` reservations.
-* Data Loader: A utility that reads users.csv, events.csv, and bookings.csv from the src/main/resources/data/ directory upon initialization.
+* **Data Loader:** A utility that reads users.csv, events.csv, and bookings.csv from the src/main/resources/data/ directory upon initialization.
 * **Interface:** A functional JavaFX dashboard that allows admins to navigate between management screens and view user data in a TableView.
 
 ---
