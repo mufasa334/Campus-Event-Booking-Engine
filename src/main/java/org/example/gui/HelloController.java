@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 public class HelloController implements Initializable {
 
     // --- UI LINKAGE (Team: Do not modify these) ---
+    // --- BOOKING TABLE LINKAGE ---
+    @FXML private TableView<BookingRecord> bookingTable;
+    @FXML private TableColumn<BookingRecord, String> colBookId, colBookUser, colBookEvent, colBookTime, colBookStatus;
+    private static ObservableList<BookingRecord> displayBookings = FXCollections.observableArrayList();
     @FXML private AnchorPane sidebarContainer;
     @FXML private AnchorPane contentArea;
     @FXML private TextField eventIdField, eventTitleField, eventCapacityField, specificAttributeField;
@@ -36,24 +40,44 @@ public class HelloController implements Initializable {
     @FXML private ComboBox<String> roleComboBox;
     @FXML private TableView<User> userTable;
     @FXML private TableColumn<User, String> colUserId, colName, colEmail, colType;
+    // --- EVENT TABLE LINKAGE ---
+    @FXML private TableView<Event> eventTable;
+    @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus;
+    @FXML private TableColumn<Event, Integer> colEventCapacity;
 
     // --- MASTER DATA LISTS (Team: Use these lists for your logic) ---
-    private ObservableList<Event> allEvents = FXCollections.observableArrayList();
-    private ObservableList<User> allUsers = FXCollections.observableArrayList();
-    private boolean isSidebarVisible = true;
+    private static ObservableList<Event> allEvents = FXCollections.observableArrayList();
+    private static ObservableList<User> allUsers = FXCollections.observableArrayList();
+    private static boolean isSidebarVisible = true;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Pre-populating data for Phase 1 testing
+        // We create a flag to check if this is the very first time the app is opening
+        boolean isFirstLoad = allEvents.isEmpty();
+
+        // 1. Load Users
         if (allUsers.isEmpty()) {
-            allUsers.add(new Student("U001", "Alice Smith", "alice@uoguelph.ca"));
+            DataLoader.loadUsers("src/main/resources/data/users.csv", allUsers);
         }
+
+        // 2. Load Events
         if (allEvents.isEmpty()) {
-            allEvents.add(new Workshop("W101", "JavaFX Workshop", LocalDateTime.now(), "THRN 1313", 2, "GUI Design"));
-            allEvents.add(new Seminar("S101", "AI Seminar", LocalDateTime.now(), "MACN 105", 50, "Dr. Taylor"));
+            DataLoader.loadEvents("src/main/resources/data/events.csv", allEvents);
         }
+
+        // 3. Load Bookings (ONLY on the very first load)
+        if (isFirstLoad) {
+            DataLoader.loadBookings("src/main/resources/data/bookings.csv", allUsers, allEvents);
+        }
+
+        // 4. Re-link the UI tables
         setupUserTable();
+        setupEventTable();
         fillAllDropdowns();
+
+        if (bookingTable != null) {
+            bookingTable.setItems(displayBookings);
+        }
     }
 
     // ============================================================
@@ -66,21 +90,26 @@ public class HelloController implements Initializable {
      */
     @FXML
     private void handleCreateBooking() {
-        // 1. Get the IDs from the UI
-        String userId = bookingUserSelection.getValue();
-        String eventId = bookingEventSelection.getValue();
+        String uId = bookingUserSelection.getValue();
+        String eId = bookingEventSelection.getValue();
 
-        if (userId == null || eventId == null) return;
+        if (uId == null || eId == null) return;
 
-        // 2. Use the "Glue" helpers to get the actual OOP Objects
-        User selectedUser = findUserById(userId);
-        Event selectedEvent = findEventById(eventId);
+        // 1. Pull the EXACT objects from the static lists
+        User selectedUser = findUserById(uId);
+        Event selectedEvent = findEventById(eId);
 
-        // --- START OOP LOGIC HERE ---
-        // Example: if (selectedEvent.isFull()) { waitlist.add(selectedUser); }
-        // else { new Booking(selectedUser, selectedEvent); }
+        if (selectedUser != null && selectedEvent != null) {
+            // 2. Add the name to the manager
+            selectedEvent.getManager().addUser(selectedUser.getName());
 
-        System.out.println("Logic Hook: " + selectedUser.getName() + " is booking " + selectedEvent.getTitle());
+            // 3. Debug to console immediately to confirm it worked
+            System.out.println("DEBUG: Booked " + selectedUser.getName() + " for " + selectedEvent.getEventId());
+            System.out.println("DEBUG: Current List Size: " + selectedEvent.getManager().UserList.size());
+
+            // 4. Update the UI
+            refreshBookingTable(selectedEvent);
+        }
     }
 
     // ↓↓↓ PASTE THE NEW CODE RIGHT HERE ↓↓↓
@@ -95,18 +124,18 @@ public class HelloController implements Initializable {
         String userId = bookingUserSelection.getValue();
         String eventId = bookingEventSelection.getValue();
 
-        if (userId == null || eventId == null) {
-            System.out.println("UI Warning: Select a User and Event to cancel.");
-            return;
-        }
+        if (userId == null || eventId == null) return;
 
         User selectedUser = findUserById(userId);
         Event selectedEvent = findEventById(eventId);
 
-        // --- TEAM: WRITE CANCEL BOOKING LOGIC HERE ---
-        // Example: selectedEvent.getManager().cancelBooking(selectedUser);
+        // --- THE GLUE ---
+        selectedEvent.getManager().cancelBooking(selectedUser.getName());
+        System.out.println("Logic Hook: Cancelled booking for " + selectedUser.getName() + " at " + selectedEvent.getTitle());
 
-        System.out.println("Logic Hook: Cancelling booking for " + selectedUser.getName() + " at " + selectedEvent.getTitle());
+        // Print the updated list to prove the waitlist promotion worked
+        selectedEvent.getManager().bookWaitlistPrint();
+        refreshBookingTable(selectedEvent);
     }
 
     /**
@@ -116,20 +145,20 @@ public class HelloController implements Initializable {
      */
     @FXML
     private void handleCancelEvent() {
-        // Using the waitlist dropdown to select which event to cancel for now
         String eventId = waitlistEventSelection.getValue();
 
-        if (eventId == null) {
-            System.out.println("UI Warning: Select an Event to cancel.");
-            return;
-        }
+        if (eventId == null) return;
 
         Event selectedEvent = findEventById(eventId);
 
-        // --- TEAM: WRITE CANCEL EVENT LOGIC HERE ---
-        // Example: selectedEvent.setStatus(EventStatus.CANCELLED);
+        // --- THE GLUE ---
+        selectedEvent.setStatus(Event.EventStatus.CANCELLED);
 
-        System.out.println("Logic Hook: Shutting down entire event -> " + selectedEvent.getTitle());
+        // Wipe the teammate's array list clean
+        selectedEvent.getManager().UserList.clear();
+
+        System.out.println("Logic Hook: EVENT CANCELLED -> " + selectedEvent.getTitle());
+        System.out.println("All bookings and waitlists for this event have been wiped.");
     }
 
     /**
@@ -138,23 +167,20 @@ public class HelloController implements Initializable {
      */
     @FXML
     private void handleViewWaitlist() {
-        // Grabs the ID from your Waitlist UI dropdown
-        String eventId = waitlistEventSelection.getValue();
+        String eId = waitlistEventSelection.getValue();
+        if (eId == null) return;
 
-        if (eventId == null) {
-            System.out.println("UI Warning: Select an Event to view its waitlist.");
-            return;
+        // 1. Find the event in the master static list
+        Event selectedEvent = findEventById(eId);
+
+        if (selectedEvent != null) {
+            // 2. Print the teammate's audit to console
+            selectedEvent.getManager().bookWaitlistPrint();
+
+            // 3. Push the data to the UI table
+            refreshBookingTable(selectedEvent);
         }
-
-        Event selectedEvent = findEventById(eventId);
-
-        // --- TEAM: WRITE VIEW WAITLIST LOGIC HERE ---
-        // Example: User[] currentWaitlist = selectedEvent.getManager().getWaitlist();
-        // Print them to the console so we know the order is correct.
-
-        System.out.println("Logic Hook: Fetching waitlist for " + selectedEvent.getTitle());
     }
-
     // ↑↑↑ PASTE ENDS HERE ↑↑↑
 
     /**
@@ -193,6 +219,19 @@ public class HelloController implements Initializable {
         }
     }
 
+    private void setupEventTable() {
+        if (eventTable != null && colEventId != null) {
+            colEventId.setCellValueFactory(new PropertyValueFactory<>("eventId"));
+            colEventTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
+            colEventCapacity.setCellValueFactory(new PropertyValueFactory<>("capacity"));
+            colEventType.setCellValueFactory(new PropertyValueFactory<>("eventType"));
+            colEventStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+            // Because allEvents is an ObservableList, it will auto-update when you click Add!
+            eventTable.setItems(allEvents);
+        }
+    }
+
     private void fillAllDropdowns() {
         if (roleComboBox != null) roleComboBox.setItems(FXCollections.observableArrayList("Student", "Staff", "Guest"));
         if (eventTypeDropdown != null) eventTypeDropdown.setItems(FXCollections.observableArrayList("Workshop", "Seminar", "Concert"));
@@ -206,31 +245,25 @@ public class HelloController implements Initializable {
 
     @FXML
     private void AddUser() {
-        System.out.println("--- Add User Button Clicked ---");
-
-        // Check if the fields actually exist
-        if (idField == null || roleComboBox == null) {
-            System.out.println("CRITICAL ERROR: idField or roleComboBox is NULL. Injection failed!");
-            return;
-        }
-
         String id = idField.getText();
         String name = nameField.getText();
         String type = roleComboBox.getValue();
 
-        System.out.println("Data entered: ID=" + id + ", Type=" + type);
+        // 1. Basic empty check
+        if (id == null || type == null || id.isEmpty()) return;
 
-        // If you haven't selected a role, this line stops the method!
-        if (id == null || type == null || id.isEmpty()) {
-            System.out.println("Warning: ID or Role is empty. Stopping.");
-            return;
+        // 2. THE GUARD (Must be here!)
+        if (findUserById(id) != null) {
+            System.out.println("Error: User ID '" + id + "' already exists! Blocked.");
+            return; // This STOPS the code from reaching the "add" part below
         }
 
+        // 3. Only if the guard passes, we create and add the user
         User newUser = type.equals("Student") ? new Student(id, name, emailField.getText()) :
                 type.equals("Staff") ? new Staff(id, name, emailField.getText()) :
                         new Guest(id, name, emailField.getText());
 
-        allUsers.add(newUser);
+        allUsers.add(newUser); // This adds it to the table
         System.out.println("Success: User added to list. Total users: " + allUsers.size());
 
         fillAllDropdowns();
@@ -241,16 +274,48 @@ public class HelloController implements Initializable {
     private void AddEvent() {
         String eId = eventIdField.getText();
         String type = eventTypeDropdown.getValue();
-        if (eId == null || type == null) return;
+
+        // 1. Basic validation: Ensure ID and Type are selected
+        if (eId == null || eId.isEmpty() || type == null) {
+            System.out.println("Warning: Event ID and Type are required.");
+            return;
+        }
+
+        // 2. THE GUARD: Prevent duplicate Event IDs
+        if (findEventById(eId) != null) {
+            System.out.println("Error: Event ID '" + eId + "' already exists! Blocked.");
+            return; // Emergency exit!
+        }
+
         try {
+            // 3. Convert capacity string to integer
             int cap = Integer.parseInt(eventCapacityField.getText());
-            Event newEvent = type.equals("Workshop") ? new Workshop(eId, eventTitleField.getText(), LocalDateTime.now(), "TBD", cap, specificAttributeField.getText()) :
-                    type.equals("Seminar") ? new Seminar(eId, eventTitleField.getText(), LocalDateTime.now(), "TBD", cap, specificAttributeField.getText()) :
+
+            // 4. Determine which subclass to instantiate
+            Event newEvent = type.equals("Workshop") ?
+                    new Workshop(eId, eventTitleField.getText(), LocalDateTime.now(), "TBD", cap, specificAttributeField.getText()) :
+                    type.equals("Seminar") ?
+                            new Seminar(eId, eventTitleField.getText(), LocalDateTime.now(), "TBD", cap, specificAttributeField.getText()) :
                             new Concert(eId, eventTitleField.getText(), LocalDateTime.now(), "TBD", cap, specificAttributeField.getText());
+
+            // 5. Add to the Master List (this updates the UI Table automatically)
             allEvents.add(newEvent);
+
+            System.out.println("SUCCESS: " + newEvent.getTitle() + " added to the system.");
+
+            // 6. Refresh dropdowns and wipe fields
             fillAllDropdowns();
-            eventIdField.clear(); eventTitleField.clear(); eventCapacityField.clear(); specificAttributeField.clear();
-        } catch (Exception e) { System.out.println("Error adding event"); }
+            eventIdField.clear();
+            eventTitleField.clear();
+            eventCapacityField.clear();
+            specificAttributeField.clear();
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Capacity must be a whole number (no letters or spaces).");
+        } catch (Exception e) {
+            System.out.println("Unexpected Error adding event: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML public void showUserManagement() { switchView("user-management.fxml"); }
@@ -262,10 +327,24 @@ public class HelloController implements Initializable {
         try {
             if (contentArea == null) return;
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
+
+            // Use 'this' so we keep the SAME controller instance with our STATIC lists
             loader.setController(this);
             Node view = loader.load();
+
             contentArea.getChildren().setAll(view);
-            Platform.runLater(this::fillAllDropdowns);
+
+            // CRITICAL: After loading the new FXML, we MUST tell the new TableView
+            // to look at our data immediately, otherwise it stays blank.
+            Platform.runLater(() -> {
+                setupUserTable();
+                setupEventTable();
+                if (bookingTable != null) {
+                    bookingTable.setItems(displayBookings);
+                }
+                fillAllDropdowns();
+            });
+
             AnchorPane.setTopAnchor(view, 0.0); AnchorPane.setBottomAnchor(view, 0.0);
             AnchorPane.setLeftAnchor(view, 0.0); AnchorPane.setRightAnchor(view, 0.0);
         } catch (IOException e) { e.printStackTrace(); }
@@ -286,4 +365,58 @@ public class HelloController implements Initializable {
     }
 
     @FXML public void closeApplication() { Platform.exit(); System.exit(0); }
+
+
+
+    private void refreshBookingTable(Event selectedEvent) {
+        if (bookingTable == null || selectedEvent == null) return;
+
+        // 1. Re-link the columns to the BookingRecord properties
+        colBookId.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
+        colBookUser.setCellValueFactory(new PropertyValueFactory<>("userName"));
+        colBookEvent.setCellValueFactory(new PropertyValueFactory<>("eventId"));
+        colBookTime.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        colBookStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        displayBookings.clear();
+        BookingWaitlistingManager mgr = selectedEvent.getManager();
+
+        // 2. Loop through the actual names in the manager
+        // We start at 0 and use a simple check to skip any potential nulls
+        for (String name : mgr.UserList) {
+            if (name != null && !name.trim().isEmpty()) {
+                displayBookings.add(new BookingRecord(
+                        mgr.getBookingID(),
+                        name,
+                        mgr.getEventID(),
+                        "2026-03-06",
+                        mgr.getStatus(name)
+                ));
+            }
+        }
+
+        // 3. Force the TableView to refresh
+        bookingTable.setItems(displayBookings);
+        bookingTable.refresh();
+    }
+
+    /**
+     * Tiny Wrapper Class so the JavaFX TableView can read the data.
+     */
+    public static class BookingRecord {
+        private String bookingId, userName, eventId, createdAt, status;
+
+        public BookingRecord(String bookingId, String userName, String eventId, String createdAt, String status) {
+            this.bookingId = bookingId; this.userName = userName;
+            this.eventId = eventId; this.createdAt = createdAt; this.status = status;
+        }
+        // The table REQUIRES these exact getters to work
+        public String getBookingId() { return bookingId; }
+        public String getUserName() { return userName; }
+        public String getEventId() { return eventId; }
+        public String getCreatedAt() { return createdAt; }
+        public String getStatus() { return status; }
+    }
+
+
 }

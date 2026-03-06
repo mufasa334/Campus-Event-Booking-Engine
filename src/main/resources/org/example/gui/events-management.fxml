@@ -17,35 +17,31 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
          <children>
-            <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-               <children>
-                  <TextField fx:id="idField" promptText="Event ID" />
-                  <TextField fx:id="nameField" promptText="Title" />
-                  <TextField fx:id="emailField" promptText="Location" />
-                  <TextField fx:id="idField1" promptText="Capacity" />
-                  <TextField fx:id="idField11" promptText="Date/Time" />
-                  <TextField fx:id="idField111" promptText="Topic/Speaker/Age" />
-                  <ComboBox fx:id="eventTypeDropdown" promptText="Event-Type" />
-                  <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Add-User" />
-               </children>
-            </HBox>
-            <TableView fx:id="userTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
-              <columns>
-                <TableColumn prefWidth="75.0" text="  ID" />
-                <TableColumn prefWidth="75.0" text="Title" />
-                  <TableColumn prefWidth="75.0" text="Date/Time" />
-                  <TableColumn prefWidth="75.0" text="Location" />
-                  <TableColumn prefWidth="75.0" text="Capacity" />
-                  <TableColumn prefWidth="75.0" text="Status" />
-                  <TableColumn prefWidth="75.0" text="Type" />
-                  <TableColumn prefWidth="75.0" text="Topic" />
-                  <TableColumn prefWidth="75.0" text="Speaker" />
-                  <TableColumn prefWidth="90.0" text="AgeRestriction" />
-              </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
+             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                 <children>
+                     <TextField fx:id="eventIdField" promptText="Event ID" />
+                     <TextField fx:id="eventTitleField" promptText="Title" />
+                     <TextField promptText="Location (TBD)" />
+                     <TextField fx:id="eventCapacityField" promptText="Capacity (Numbers Only)" />
+                     <TextField promptText="Date/Time" />
+                     <TextField fx:id="specificAttributeField" promptText="Topic/Speaker/Age" />
+                     <ComboBox fx:id="eventTypeDropdown" promptText="Event-Type" />
+
+                     <Button onAction="#AddEvent" mnemonicParsing="false" prefHeight="25.0" text="Add Event" />
+                 </children>
+             </HBox>
+             <TableView fx:id="eventTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
+                 <columns>
+                     <TableColumn fx:id="colEventId" prefWidth="75.0" text="Event ID" />
+                     <TableColumn fx:id="colEventTitle" prefWidth="100.0" text="Title" />
+                     <TableColumn fx:id="colEventCapacity" prefWidth="75.0" text="Capacity" />
+                     <TableColumn fx:id="colEventType" prefWidth="75.0" text="Type" />
+                     <TableColumn fx:id="colEventStatus" prefWidth="75.0" text="Status" />
+                 </columns>
+                 <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                 </columnResizePolicy>
+             </TableView>
          </children>
       </VBox>
    </children>

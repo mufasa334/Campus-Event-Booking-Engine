@@ -16,26 +16,26 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
          <children>
-            <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-               <children>
-                  <ComboBox fx:id="bookingUserSelection" prefWidth="150.0" promptText="Select User" />
-                  <ComboBox fx:id="bookingEventSelection" prefWidth="150.0" promptText="Select Event" />
-                  <Button fx:id="addUser" mnemonicParsing="false" prefHeight="25.0" text="Book Event" />
-                  <Button fx:id="addUser1" mnemonicParsing="false" prefHeight="25.0" text="Cancel Booking" />
-               </children>
-            </HBox>
-            <TableView fx:id="userTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
-              <columns>
-                <TableColumn prefWidth="75.0" text="  Booking ID" />
-                <TableColumn prefWidth="75.0" text="User ID" />
-                  <TableColumn prefWidth="75.0" text="Event ID" />
-                  <TableColumn prefWidth="75.0" text="Created At" />
-                  <TableColumn prefWidth="75.0" text="Status" />
-              </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
-            </TableView>
+             <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                 <children>
+                     <ComboBox fx:id="bookingUserSelection" prefWidth="150.0" promptText="Select User" />
+                     <ComboBox fx:id="bookingEventSelection" prefWidth="150.0" promptText="Select Event" />
+                     <Button onAction="#handleCreateBooking" mnemonicParsing="false" prefHeight="25.0" text="Book Event" />
+                     <Button onAction="#handleCancelBooking" mnemonicParsing="false" prefHeight="25.0" text="Cancel Booking" />
+                 </children>
+             </HBox>
+             <TableView fx:id="bookingTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
+                 <columns>
+                     <TableColumn fx:id="colBookId" prefWidth="75.0" text="Booking ID" />
+                     <TableColumn fx:id="colBookUser" prefWidth="75.0" text="User Name" />
+                     <TableColumn fx:id="colBookEvent" prefWidth="75.0" text="Event ID" />
+                     <TableColumn fx:id="colBookTime" prefWidth="75.0" text="Created At" />
+                     <TableColumn fx:id="colBookStatus" prefWidth="75.0" text="Status" />
+                 </columns>
+                 <columnResizePolicy>
+                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                 </columnResizePolicy>
+             </TableView>
          </children>
       </VBox>
    </children>

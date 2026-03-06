@@ -1,0 +1,2 @@
+bookingId,userId,eventId,createdAt,bookingStatus
+B9001,U001,E101,2026-02-01T09:15,Confirmed
