@@ -12,14 +12,14 @@ The **Campus Event Management Suite** is a full-stack Object-Oriented applicatio
 * **Real-Time Data Binding:** Powered by **JavaFX** `ObservableList` and `TableView` to guarantee that the UI reflects the current state of the in-memory database instantly.
 * **Automated Data Pipeline:** Includes a robust `DataLoader` utility that parses flat-file datasets (CSV) to automatically hydrate the system's class hierarchies upon startup.
 * **State Persistence Logic:** Manages complex booking states (Confirmed, Waitlisted, Cancelled) using optimized Java Collections for low-latency retrieval.
-
+---
 ### 🛠️ Tech Stack
 
 * **Language:** Java 21
 * **Framework:** JavaFX (GUI & Data Binding)
 * **Architecture:** Model-View-Controller (MVC)
 * **Dependency Management:** Maven
-
+---
 ### 💻 Execution & Setup
 
 1. Clone the repository to your local environment.
