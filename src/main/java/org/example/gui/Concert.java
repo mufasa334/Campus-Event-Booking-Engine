@@ -17,6 +17,7 @@ public class Concert extends Event{
 
     public String getAgeRestriction() { return ageRestriction; }
     public void setAgeRestriction(String ageRestriction) { this.ageRestriction = ageRestriction; }
+    public String getSpecificAttribute() { return ageRestriction; }
 
     //---------------------------------------METHODS---------------------------------------------------
 }

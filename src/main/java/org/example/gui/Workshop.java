@@ -20,5 +20,7 @@ public class Workshop extends Event{
     public String getTopic() { return topic; }
 
     public void setTopic(String topic) { this.topic = topic; }
+
+    public String getSpecificAttribute() { return topic; }
     //---------------------------------------METHODS-------------------------------------------------
 }

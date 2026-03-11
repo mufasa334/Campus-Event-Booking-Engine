@@ -17,5 +17,6 @@ public class Seminar extends Event{
 
     public String getSpeakerName() { return speakerName; }
     public void setSpeakerName(String speakerName) { this.speakerName = speakerName; }
+    public String getSpecificAttribute() { return speakerName; }
     //----------------------------------------METHODS--------------------------------------------------
 }

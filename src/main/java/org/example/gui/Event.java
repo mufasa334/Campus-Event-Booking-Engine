@@ -98,6 +98,8 @@ public abstract class Event {
 
     //--------------------------------------METHODS-------------------------------------------------
 
+    public abstract String getSpecificAttribute();
+
     //A METHOD FOR EACH SUBCLASS THAT ADDS PEOPLE TO THE ATTENDANCE LIST AS LONG AS THE EVENT IS NOT FULL ON CAPACITY
     //PRECONDITION: ANY [PERSON] AND ADDS THEM TO THE ATTENDEES ARRAY
     /*public void addAttendance(User guy) {
