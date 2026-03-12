@@ -308,6 +308,7 @@ public class HelloController implements Initializable {
         if (waitlistEventSelection != null) waitlistEventSelection.setItems(eventIds);
     }
 
+
     @FXML
     private void AddUser() {
         String id = idField.getText();
@@ -430,7 +431,18 @@ public class HelloController implements Initializable {
 
     @FXML public void closeApplication() { Platform.exit(); System.exit(0); }
 
+    @FXML
+private void handleSaveData() {
+    DataSaver.saveAll(allUsers, allEvents);
 
+    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    alert.setTitle("Save Successful");
+    alert.setHeaderText(null);
+    alert.setContentText("All data has been saved successfully!\n\nUsers, events, and bookings have been written to the CSV files.");
+    alert.showAndWait();
+
+    System.out.println("Manual save triggered by user.");
+}
 
     // This new method loops through EVERY event and prints EVERY booking to the table.
     private void refreshALLBookingsTable() {

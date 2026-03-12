@@ -123,6 +123,11 @@
                                  </image></ImageView>
                            </graphic>
                         </Button>
+                        <Button fx:id="btnSave" mnemonicParsing="false" onAction="#handleSaveData" prefHeight="38.0" prefWidth="204.0" text="Save Data">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                        </Button>
                      </children>
                   </VBox>
                </children>
