@@ -22,6 +22,11 @@ import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import static org.example.gui.User.UserType.GUEST;
+import static org.example.gui.User.UserType.STUDENT;
+import static org.example.gui.User.UserType.STAFF;
+
+
 public class HelloController implements Initializable {
 
     // --- UI LINKAGE (Team: Do not modify these) ---
@@ -101,6 +106,24 @@ public class HelloController implements Initializable {
         User selectedUser = findUserById(uId);
         Event selectedEvent = findEventById(eId);
 
+        //Limits the number of bookings depending on the UserType
+        if (selectedUser.getUserType() == GUEST){
+            if(selectedUser.getLimitingInt() >= 1){
+                System.out.println("Maximum Bookings Reached");
+                return;
+            }
+        } else if (selectedUser.getUserType() == STUDENT){
+            if(selectedUser.getLimitingInt() >= 3){
+                System.out.println("Maximum Bookings Reached");
+                return;
+            }
+        } else if (selectedUser.getUserType() == STAFF){
+            if(selectedUser.getLimitingInt() >= 5){
+                System.out.println("Maximum Bookings Reached");
+                return;
+            }
+        }
+
         if (selectedUser != null && selectedEvent != null) {
             // 2. Add the name to the manager
             selectedEvent.getManager().addUser(selectedUser.getName());
@@ -111,6 +134,9 @@ public class HelloController implements Initializable {
 
             // 4. Update the UI
             refreshALLBookingsTable();
+
+            //Part of limiting the number of bookings depending on the UserType
+            selectedUser.limitingNumberUP();
         }
     }
 
@@ -151,6 +177,9 @@ public class HelloController implements Initializable {
 
             // 3. Update the UI [cite: 90]
             refreshALLBookingsTable();
+
+            //Part of limiting the number of bookings depending on the UserType
+            selectedUser.limitingNumberDOWN();
         }
     }
 

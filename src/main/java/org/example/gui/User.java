@@ -13,6 +13,9 @@ public abstract class User {
     private String email;
     private UserType userType;
 
+    //variable for limtingNumber methods
+    private int limitingInt;
+
     //-----------------------------------CONSTRUCTOR--------------------------------------------
 
     public User(String userId, String name, String email, UserType userType, int maxConfirmedBookings) {
@@ -22,6 +25,7 @@ public abstract class User {
         setEmail(email);
         setUserType(userType);
         setMaxConfirmedBookings(maxConfirmedBookings);
+        setLimitingInt(limitingInt);
 
     }
 
@@ -59,8 +63,29 @@ public abstract class User {
 
     public UserType getUserType() { return userType; }
 
-    //---------------------------------METHODS----------------------------------------------------
+    public void setLimitingInt(int limitingInt) {
+        limitingInt = 0;
+        this.limitingInt = limitingInt;
+    }
 
+    public int getLimitingInt(){
+        return limitingInt;
+    }
+
+    //---------------------------------METHODS----------------------------------------------------
+    //methods to help with limiting the number of bookings per user
+    public int limitingNumberUP(){
+        limitingInt = limitingInt + 1;
+        return limitingInt;
+    }
+
+    public int limitingNumberDOWN(){
+        if (limitingInt > 0){
+            limitingInt = limitingInt - 1;
+            return limitingInt;
+        }
+        return limitingInt;
+    }
     //A METHOD FOR EACH SUBCLASS THAT WILL PRINT OUT THEIR DETAILS
     //public abstract void details();
 
