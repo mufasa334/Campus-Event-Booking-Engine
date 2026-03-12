@@ -20,7 +20,7 @@
                 <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                     <children>
                         <ComboBox fx:id="waitlistEventSelection" prefWidth="150.0" promptText="Select Event" />
-                        <Button onAction="#handleViewWaitlist" mnemonicParsing="false" prefHeight="25.0" text="View Waitlist" />
+                        <Button mnemonicParsing="false" onAction="#handleViewWaitlist" prefHeight="25.0" text="View Waitlist" />
                     </children>
                 </HBox>
                 <TableView fx:id="bookingTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
@@ -35,7 +35,7 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
-                <TextArea editable="false" prefHeight="66.0" prefWidth="478.0" text="System Notifications will appear here..." />
+                <TextArea fx:id="notificationArea" editable="false" prefHeight="66.0" prefWidth="478.0" text="System Notifications will appear here..." />
             </children>
         </VBox>
     </children>

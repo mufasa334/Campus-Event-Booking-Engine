@@ -26,6 +26,7 @@ public class HelloController implements Initializable {
 
     // --- UI LINKAGE (Team: Do not modify these) ---
     // --- BOOKING TABLE LINKAGE ---
+    @FXML private TextArea notificationArea;
     @FXML private TableView<BookingRecord> bookingTable;
     @FXML private TableColumn<BookingRecord, String> colBookId, colBookUser, colBookEvent, colBookTime, colBookStatus;
     private static ObservableList<BookingRecord> displayBookings = FXCollections.observableArrayList();
@@ -73,6 +74,7 @@ public class HelloController implements Initializable {
         // 4. Re-link the UI tables
         setupUserTable();
         setupEventTable();
+        refreshALLBookingsTable();
         fillAllDropdowns();
 
         if (bookingTable != null) {
@@ -108,17 +110,19 @@ public class HelloController implements Initializable {
             System.out.println("DEBUG: Current List Size: " + selectedEvent.getManager().UserList.size());
 
             // 4. Update the UI
-            refreshBookingTable(selectedEvent);
+            refreshALLBookingsTable();
         }
     }
 
-    // ↓↓↓ PASTE THE NEW CODE RIGHT HERE ↓↓↓
+    @FXML
+    private void handleDropdownChange() {
+        if (bookingEventSelection != null && bookingEventSelection.getValue() != null) {
+            String selectedId = bookingEventSelection.getValue();
+            Event selectedEvent = findEventById(selectedId);
+            refreshALLBookingsTable();
+        }
+    }
 
-    /**
-     * ACTION: "Cancel Booking" Button Clicked
-     * Team: Write logic to cancel the user's booking for the selected event.
-     * IMPORTANT: If a confirmed booking is cancelled, you MUST promote the first person on the waitlist!
-     */
     @FXML
     private void handleCancelBooking() {
         String userId = bookingUserSelection.getValue();
@@ -129,20 +133,28 @@ public class HelloController implements Initializable {
         User selectedUser = findUserById(userId);
         Event selectedEvent = findEventById(eventId);
 
-        // --- THE GLUE ---
-        selectedEvent.getManager().cancelBooking(selectedUser.getName());
-        System.out.println("Logic Hook: Cancelled booking for " + selectedUser.getName() + " at " + selectedEvent.getTitle());
+        if (selectedUser != null && selectedEvent != null) {
+            // 1. Logic Hook: Cancel the booking [cite: 70]
+            selectedEvent.getManager().cancelBooking(selectedUser.getName());
 
-        // Print the updated list to prove the waitlist promotion worked
-        selectedEvent.getManager().bookWaitlistPrint();
-        refreshBookingTable(selectedEvent);
+            // 2. Promotion Logic: Check if someone was promoted
+            // This checks if your teammate's logic promoted someone to "Booked" status
+            String message = "Success: Cancelled booking for " + selectedUser.getName() + " at " + selectedEvent.getTitle() + ".";
+
+            // NEW: Promotion Notification
+            // We add a generic alert here to let the admin know the waitlist was processed
+            Alert promotionAlert = new Alert(Alert.AlertType.INFORMATION);
+            promotionAlert.setTitle("System Update");
+            promotionAlert.setHeaderText("Waitlist Promotion Processed");
+            promotionAlert.setContentText(message + "\n\nNote: The first eligible user on the waitlist (if any) has been automatically promoted to Confirmed.");
+            promotionAlert.showAndWait();
+
+            // 3. Update the UI [cite: 90]
+            refreshALLBookingsTable();
+        }
     }
 
-    /**
-     * ACTION: "Cancel Event" Button Clicked
-     * Team: Write logic to mark the event as CANCELLED.
-     * IMPORTANT: You must also cancel all bookings for this event and clear the waitlist.
-     */
+
     @FXML
     private void handleCancelEvent() {
         String eventId = waitlistEventSelection.getValue();
@@ -161,32 +173,39 @@ public class HelloController implements Initializable {
         System.out.println("All bookings and waitlists for this event have been wiped.");
     }
 
-    /**
-     * ACTION: "View Waitlist" Button Clicked
-     * Team: Write logic to retrieve the waitlist for the selected event and print/display it.
-     */
+
     @FXML
     private void handleViewWaitlist() {
         String eId = waitlistEventSelection.getValue();
-        if (eId == null) return;
+        if (eId == null) {
+            if (notificationArea != null) notificationArea.setText("SYSTEM: Please select an Event ID first.");
+            return;
+        }
 
-        // 1. Find the event in the master static list
         Event selectedEvent = findEventById(eId);
-
         if (selectedEvent != null) {
-            // 2. Print the teammate's audit to console
-            selectedEvent.getManager().bookWaitlistPrint();
+            StringBuilder rosterInfo = new StringBuilder();
+            rosterInfo.append("--- ROSTER FOR: ").append(selectedEvent.getTitle()).append(" ---\n");
 
-            // 3. Push the data to the UI table
-            refreshBookingTable(selectedEvent);
+            // Requirement: View waitlist in correct order [cite: 83, 126]
+            if (selectedEvent.getManager().UserList.isEmpty()) {
+                rosterInfo.append("(No confirmed or waitlisted users for this event)");
+            } else {
+                for (String name : selectedEvent.getManager().UserList) {
+                    String status = selectedEvent.getManager().getStatus(name);
+                    rosterInfo.append("- ").append(name).append(" [").append(status).append("]\n");
+                }
+            }
+
+            if (notificationArea != null) {
+                notificationArea.setText(rosterInfo.toString());
+            }
+
+            refreshALLBookingsTable();
         }
     }
-    // ↑↑↑ PASTE ENDS HERE ↑↑↑
 
-    /**
-     * GLUE HELPER: Finds a User object in the master list using an ID string.
-     * Use this in your logic so you don't have to touch the list directly.
-     */
+
     public User findUserById(String id) {
         return allUsers.stream()
                 .filter(u -> u.getUserId().equals(id))
@@ -195,9 +214,7 @@ public class HelloController implements Initializable {
     }
 
 
-    /**
-     * GLUE HELPER: Finds an Event object in the master list using an ID string.
-     */
+
     public Event findEventById(String id) {
         return allEvents.stream()
                 .filter(e -> e.getEventId().equals(id))
@@ -205,9 +222,7 @@ public class HelloController implements Initializable {
                 .orElse(null);
     }
 
-    // ============================================================
-    // JAVAFX SYSTEM METHODS (Team: No need to touch anything below)
-    // ============================================================
+
 
     private void setupUserTable() {
         if (userTable != null && colUserId != null) {
@@ -216,6 +231,26 @@ public class HelloController implements Initializable {
             colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
             colType.setCellValueFactory(new PropertyValueFactory<>("userType"));
             userTable.setItems(allUsers);
+
+            // FIX: Use a MouseClick listener instead of a Selection listener
+            userTable.setOnMouseClicked(event -> {
+                // Only trigger on a single click and ensure a row is actually selected
+                User selectedUser = userTable.getSelectionModel().getSelectedItem();
+                if (selectedUser != null && event.getClickCount() == 1) {
+
+                    Alert profile = new Alert(Alert.AlertType.INFORMATION);
+                    profile.setTitle("User Profile Details");
+                    profile.setHeaderText("Identity Summary: " + selectedUser.getName());
+
+                    // This calls the summary logic we wrote earlier
+                    profile.setContentText(getUserProfileSummary(selectedUser));
+
+                    profile.showAndWait();
+
+                    // Crucial: Clear selection so it doesn't "ghost" click again
+                    userTable.getSelectionModel().clearSelection();
+                }
+            });
         }
     }
 
@@ -231,6 +266,7 @@ public class HelloController implements Initializable {
             eventTable.setItems(allEvents);
         }
     }
+
 
     private void fillAllDropdowns() {
         if (roleComboBox != null) roleComboBox.setItems(FXCollections.observableArrayList("Student", "Staff", "Guest"));
@@ -339,9 +375,8 @@ public class HelloController implements Initializable {
             Platform.runLater(() -> {
                 setupUserTable();
                 setupEventTable();
-                if (bookingTable != null) {
-                    bookingTable.setItems(displayBookings);
-                }
+
+                refreshALLBookingsTable(); // <--- ADD THIS
                 fillAllDropdowns();
             });
 
@@ -368,10 +403,11 @@ public class HelloController implements Initializable {
 
 
 
-    private void refreshBookingTable(Event selectedEvent) {
-        if (bookingTable == null || selectedEvent == null) return;
+    // This new method loops through EVERY event and prints EVERY booking to the table.
+    private void refreshALLBookingsTable() {
+        if (bookingTable == null || colBookId == null) return;
 
-        // 1. Re-link the columns to the BookingRecord properties
+        // 1. THIS WAS MISSING: Tell the columns how to read the data!
         colBookId.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
         colBookUser.setCellValueFactory(new PropertyValueFactory<>("userName"));
         colBookEvent.setCellValueFactory(new PropertyValueFactory<>("eventId"));
@@ -379,26 +415,99 @@ public class HelloController implements Initializable {
         colBookStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         displayBookings.clear();
-        BookingWaitlistingManager mgr = selectedEvent.getManager();
 
-        // 2. Loop through the actual names in the manager
-        // We start at 0 and use a simple check to skip any potential nulls
-        for (String name : mgr.UserList) {
-            if (name != null && !name.trim().isEmpty()) {
-                displayBookings.add(new BookingRecord(
-                        mgr.getBookingID(),
-                        name,
-                        mgr.getEventID(),
-                        "2026-03-06",
-                        mgr.getStatus(name)
-                ));
+        // 2. Loop through all events in the system
+        for (Event event : allEvents) {
+            BookingWaitlistingManager mgr = event.getManager();
+
+            // Loop through all users in that specific event
+            for (String name : mgr.UserList) {
+                if (name != null && !name.trim().isEmpty()) {
+                    displayBookings.add(new BookingRecord(
+                            mgr.getBookingID(), name, mgr.getEventID(), "2026-03-06", mgr.getStatus(name)
+                    ));
+                }
             }
         }
 
-        // 3. Force the TableView to refresh
+        // 3. THIS WAS MISSING: Give the full list to the table!
         bookingTable.setItems(displayBookings);
         bookingTable.refresh();
     }
+
+    private String generateUserSummary(User user) {
+        StringBuilder summary = new StringBuilder();
+        summary.append("--- USER PROFILE: ").append(user.getName()).append(" ---\n");
+        summary.append("ID: ").append(user.getUserId()).append(" | Type: ").append(user.getUserType()).append("\n");
+        summary.append("Email: ").append(user.getEmail()).append("\n\n");
+        summary.append("CURRENT BOOKINGS:\n");
+
+        boolean hasBookings = false;
+        for (Event event : allEvents) {
+            // Check if user name exists in this event's manager list [cite: 73]
+            if (event.getManager().UserList.contains(user.getName())) {
+                String status = event.getManager().getStatus(user.getName());
+                summary.append("- ").append(event.getTitle())
+                        .append(" (").append(event.getEventId()).append(") ")
+                        .append("Status: ").append(status).append("\n");
+                hasBookings = true;
+            }
+        }
+
+        if (!hasBookings) summary.append("No active bookings found.");
+        return summary.toString();
+    }
+
+
+    private String getUserBookingSummary(User user) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- ").append(user.getName()).append("'s Profile ---\n");
+        sb.append("User ID: ").append(user.getUserId()).append("\n");
+        sb.append("Type: ").append(user.getUserType()).append("\n");
+        sb.append("Email: ").append(user.getEmail()).append("\n\n");
+        sb.append("BOOKING HISTORY:\n");
+
+        boolean found = false;
+        for (Event event : allEvents) {
+            BookingWaitlistingManager mgr = event.getManager();
+            // Check if the user is in this specific event roster
+            if (mgr.UserList.contains(user.getName())) {
+                String status = mgr.getStatus(user.getName());
+                sb.append("- ").append(event.getTitle())
+                        .append(" (").append(event.getEventId()).append(") ")
+                        .append("| Status: ").append(status).append("\n");
+                found = true;
+            }
+        }
+
+        if (!found) sb.append("No bookings found for this user.");
+        return sb.toString();
+    }
+
+
+
+    private String getUserProfileSummary(User user) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("User ID: ").append(user.getUserId()).append("\n"); // [cite: 13, 101]
+        sb.append("Email: ").append(user.getEmail()).append("\n"); // [cite: 13, 101]
+        sb.append("Type: ").append(user.getUserType()).append("\n\n"); // [cite: 11, 101]
+        sb.append("BOOKING HISTORY:\n"); // [cite: 18, 72]
+
+        boolean hasHistory = false;
+        for (Event event : allEvents) { // [cite: 41, 113]
+            BookingWaitlistingManager mgr = event.getManager();
+            if (mgr.UserList.contains(user.getName())) { // [cite: 49]
+                String status = mgr.getStatus(user.getName()); // [cite: 55, 90]
+                sb.append("- ").append(event.getTitle()) // [cite: 24, 72]
+                        .append(" (").append(event.getEventId()).append(") ") // [cite: 23]
+                        .append("| Status: ").append(status).append("\n"); // [cite: 55, 121]
+                hasHistory = true;
+            }
+        }
+        if (!hasHistory) sb.append("No bookings found for this user.");
+        return sb.toString();
+    }
+
 
     /**
      * Tiny Wrapper Class so the JavaFX TableView can read the data.
