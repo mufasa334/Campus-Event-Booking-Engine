@@ -62,18 +62,19 @@ public class HelloController implements Initializable {
         boolean isFirstLoad = allEvents.isEmpty();
 
         // 1. Load Users
+        // 1. Load Users
         if (allUsers.isEmpty()) {
-            DataLoader.loadUsers("src/main/resources/data/users.csv", allUsers);
+            DataLoader.loadUsers(allUsers);
         }
 
-        // 2. Load Events
+// 2. Load Events
         if (allEvents.isEmpty()) {
-            DataLoader.loadEvents("src/main/resources/data/events.csv", allEvents);
+            DataLoader.loadEvents(allEvents);
         }
 
-        // 3. Load Bookings (ONLY on the very first load)
+// 3. Load Bookings
         if (isFirstLoad) {
-            DataLoader.loadBookings("src/main/resources/data/bookings.csv", allUsers, allEvents);
+            DataLoader.loadBookings(allUsers, allEvents);
         }
 
         // 4. Re-link the UI tables
