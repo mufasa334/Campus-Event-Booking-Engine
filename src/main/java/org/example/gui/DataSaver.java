@@ -110,7 +110,9 @@ public class DataSaver {
                 String bookingId  = mgr.getBookingID();
                 String createdAt  = mgr.getCreatedAt() != null ? mgr.getCreatedAt().format(FORMATTER) : "";
 
-                List<String> userNames = mgr.UserList;
+                List<String> userNames = mgr.UserList.stream()
+                                                     .map(User::getName)
+                                                     .toList();
 
                 for (int i = 0; i < userNames.size(); i++) {
                     String name = userNames.get(i);

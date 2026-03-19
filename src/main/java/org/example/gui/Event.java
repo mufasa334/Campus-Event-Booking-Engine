@@ -39,7 +39,7 @@ public abstract class Event {
         setStatus(EventStatus.CONFIRMED);
         setEventType(eventType);
 
-        manager = new BookingWaitlistingManager(capacity,eventId,title);
+        manager = new BookingWaitlistingManager(capacity);
 
         //attendees = new User[capacity];
     }

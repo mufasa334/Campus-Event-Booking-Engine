@@ -19,6 +19,7 @@ import javafx.animation.Interpolator;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -127,7 +128,7 @@ public class HelloController implements Initializable {
 
         if (selectedUser != null && selectedEvent != null) {
             // 2. Add the name to the manager
-            selectedEvent.getManager().addUser(selectedUser.getName());
+            selectedEvent.getManager().addUser(selectedUser);
 
             // 3. Debug to console immediately to confirm it worked
             System.out.println("DEBUG: Booked " + selectedUser.getName() + " for " + selectedEvent.getEventId());
@@ -167,7 +168,7 @@ public class HelloController implements Initializable {
             }
 
             // 1. Logic Hook: Cancel the booking [cite: 70]
-            selectedEvent.getManager().cancelBooking(selectedUser.getName());
+            selectedEvent.getManager().cancelBooking(selectedUser);
 
             // 2. Promotion Logic: Check if someone was promoted
             // This checks if your teammate's logic promoted someone to "Booked" status
@@ -200,9 +201,12 @@ public class HelloController implements Initializable {
 
         // --- THE GLUE ---
         selectedEvent.setStatus(Event.EventStatus.CANCELLED);
+        ArrayList<User> removal = new ArrayList<>(selectedEvent.getManager().UserList);
 
         // Wipe the teammate's array list clean
-        selectedEvent.getManager().UserList.clear();
+        for(User user: removal) {
+            selectedEvent.getManager().cancelBooking(user);
+        }
 
         System.out.println("Logic Hook: EVENT CANCELLED -> " + selectedEvent.getTitle());
         System.out.println("All bookings and waitlists for this event have been wiped.");
@@ -226,9 +230,9 @@ public class HelloController implements Initializable {
             if (selectedEvent.getManager().UserList.isEmpty()) {
                 rosterInfo.append("(No confirmed or waitlisted users for this event)");
             } else {
-                for (String name : selectedEvent.getManager().UserList) {
-                    String status = selectedEvent.getManager().getStatus(name);
-                    rosterInfo.append("- ").append(name).append(" [").append(status).append("]\n");
+                for (User user : selectedEvent.getManager().UserList) {
+                    String status = selectedEvent.getManager().getStatus(user);
+                    rosterInfo.append("- ").append(user.getName()).append(" [").append(status).append("]\n");
                 }
             }
 
@@ -468,10 +472,10 @@ private void handleSaveData() {
             BookingWaitlistingManager mgr = event.getManager();
 
             // Loop through all users in that specific event
-            for (String name : mgr.UserList) {
-                if (name != null && !name.trim().isEmpty()) {
+            for (User user : mgr.UserList) {
+                if (user != null && !user.getName().trim().isEmpty()) {
                     displayBookings.add(new BookingRecord(
-                            mgr.getBookingID(), name, mgr.getEventID(), "2026-03-06", mgr.getStatus(name)
+                            mgr.getBookingID(), user.getName(), event.getEventId(), "2026-03-06", mgr.getStatus(user)
                     ));
                 }
             }
@@ -492,8 +496,8 @@ private void handleSaveData() {
         boolean hasBookings = false;
         for (Event event : allEvents) {
             // Check if user name exists in this event's manager list [cite: 73]
-            if (event.getManager().UserList.contains(user.getName())) {
-                String status = event.getManager().getStatus(user.getName());
+            if (event.getManager().UserList.contains(user)) {
+                String status = event.getManager().getStatus(user);
                 summary.append("- ").append(event.getTitle())
                         .append(" (").append(event.getEventId()).append(") ")
                         .append("Status: ").append(status).append("\n");
@@ -518,8 +522,8 @@ private void handleSaveData() {
         for (Event event : allEvents) {
             BookingWaitlistingManager mgr = event.getManager();
             // Check if the user is in this specific event roster
-            if (mgr.UserList.contains(user.getName())) {
-                String status = mgr.getStatus(user.getName());
+            if (mgr.UserList.contains(user)) {
+                String status = mgr.getStatus(user);
                 sb.append("- ").append(event.getTitle())
                         .append(" (").append(event.getEventId()).append(") ")
                         .append("| Status: ").append(status).append("\n");
@@ -543,8 +547,8 @@ private void handleSaveData() {
         boolean hasHistory = false;
         for (Event event : allEvents) { // [cite: 41, 113]
             BookingWaitlistingManager mgr = event.getManager();
-            if (mgr.UserList.contains(user.getName())) { // [cite: 49]
-                String status = mgr.getStatus(user.getName()); // [cite: 55, 90]
+            if (mgr.UserList.contains(user)) { // [cite: 49]
+                String status = mgr.getStatus(user); // [cite: 55, 90]
                 sb.append("- ").append(event.getTitle()) // [cite: 24, 72]
                         .append(" (").append(event.getEventId()).append(") ") // [cite: 23]
                         .append("| Status: ").append(status).append("\n"); // [cite: 55, 121]
