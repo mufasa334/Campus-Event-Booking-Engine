@@ -107,6 +107,7 @@ public class DataLoader {
 
                 if (targetUser != null && targetEvent != null) {
                     targetEvent.getManager().addUser(targetUser.getName());
+                    targetUser.limitingNumberUP();
                 }
             }
 

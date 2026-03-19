@@ -161,6 +161,11 @@ public class HelloController implements Initializable {
         Event selectedEvent = findEventById(eventId);
 
         if (selectedUser != null && selectedEvent != null) {
+            //Part of limiting the number of bookings depending on the UserType
+            if (selectedEvent.getManager().UserList.contains(selectedUser.getName())) {
+                selectedUser.limitingNumberDOWN();
+            }
+
             // 1. Logic Hook: Cancel the booking [cite: 70]
             selectedEvent.getManager().cancelBooking(selectedUser.getName());
 
@@ -179,8 +184,8 @@ public class HelloController implements Initializable {
             // 3. Update the UI [cite: 90]
             refreshALLBookingsTable();
 
-            //Part of limiting the number of bookings depending on the UserType
-            selectedUser.limitingNumberDOWN();
+
+
         }
     }
 
