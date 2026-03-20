@@ -89,32 +89,20 @@ public class DataSaver {
 
             for (Event event : eventList) {
                 BookingWaitlistingManager mgr = event.getManager();
-                String eventId = event.getEventId();
-                String bookingId = mgr.getBookingID();
-                String createdAt = mgr.getCreatedAt() != null ? mgr.getCreatedAt().format(FORMATTER) : "";
 
-                List<User> bookedUsers = mgr.getUserList();
+                // 🔥 NEW: use BookingEntry instead of User
+                for (BookingWaitlistingManager.BookingEntry booking : mgr.getBookings()) {
 
-                for (int i = 0; i < bookedUsers.size(); i++) {
-                    User user = bookedUsers.get(i);
-                    if (user == null) continue;
+                    User user = booking.getUser();
 
-                    String userId = user.getUserId();
+                    bw.write(
+                            booking.getBookingId() + "," +
+                                    user.getUserId() + "," +
+                                    event.getEventId() + "," +
+                                    booking.getCreatedAt().format(FORMATTER) + "," +
+                                    booking.getStatus()   // CONFIRMED / WAITLISTED / CANCELLED
+                    );
 
-                    String bookingStatus;
-                    if (event.getStatus() == Event.EventStatus.CANCELLED) {
-                        bookingStatus = "Cancelled";
-                    } else if (i < event.getCapacity()) {
-                        bookingStatus = "Confirmed";
-                    } else {
-                        bookingStatus = "Waitlisted";
-                    }
-
-                    bw.write(bookingId + ","
-                            + userId + ","
-                            + eventId + ","
-                            + createdAt + ","
-                            + bookingStatus);
                     bw.newLine();
                 }
             }
@@ -125,6 +113,8 @@ public class DataSaver {
             System.out.println("Error saving bookings: " + e.getMessage());
         }
     }
+
+
 
     public static void saveAll(List<User> userList, List<Event> eventList) {
         saveUsers("src/main/resources/data/users.csv", userList);

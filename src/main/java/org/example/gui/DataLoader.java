@@ -100,15 +100,19 @@ public class DataLoader {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine(); // skip header
+            br.readLine();
 
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
+                if (line.trim().isEmpty()) continue;
 
+                String[] data = line.split(",", -1);
                 if (data.length < 5) continue;
 
+                String bookingId = data[0].trim();
                 String userId = data[1].trim();
                 String eventId = data[2].trim();
+                LocalDateTime createdAt = LocalDateTime.parse(data[3].trim());
+                String statusText = data[4].trim().toUpperCase();
 
                 User targetUser = null;
                 for (User u : userList) {
@@ -127,11 +131,19 @@ public class DataLoader {
                 }
 
                 if (targetUser != null && targetEvent != null) {
-                    if (!targetEvent.getManager().containsUser(targetUser)) {
-                        targetEvent.getManager().addUser(targetUser);
+                    BookingWaitlistingManager.BookingStatus status =
+                            BookingWaitlistingManager.BookingStatus.valueOf(statusText);
+
+                    targetEvent.getManager().addLoadedBooking(targetUser, bookingId, createdAt, status);
+
+                    if (status != BookingWaitlistingManager.BookingStatus.CANCELLED) {
                         targetUser.limitingNumberUP();
                     }
                 }
+            }
+
+            for (Event event : eventList) {
+                event.getManager().refreshStatuses();
             }
 
         } catch (IOException e) {
@@ -139,3 +151,4 @@ public class DataLoader {
         }
     }
 }
+

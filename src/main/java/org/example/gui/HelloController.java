@@ -120,7 +120,7 @@ public class HelloController implements Initializable {
         selectedEvent.getManager().addUser(selectedUser);
 
         System.out.println("DEBUG: Booked " + selectedUser.getName() + " for " + selectedEvent.getEventId());
-        System.out.println("DEBUG: Current List Size: " + selectedEvent.getManager().getUserList().size());
+        System.out.println("DEBUG: Current List Size: " + selectedEvent.getManager().getBookings().size());
 
         selectedUser.limitingNumberUP();
         refreshALLBookingsTable();
@@ -129,6 +129,47 @@ public class HelloController implements Initializable {
     @FXML
     private void handleDropdownChange() {
         if (bookingEventSelection != null && bookingEventSelection.getValue() != null) {
+            refreshALLBookingsTable();
+        }
+    }
+    @FXML// Delete feature might need a button or something for this use
+    private void handleDeleteBooking() {
+        String userId = bookingUserSelection.getValue();
+        String eventId = bookingEventSelection.getValue();
+
+        if (userId == null || eventId == null) return;
+
+        User selectedUser = findUserById(userId);
+        Event selectedEvent = findEventById(eventId);
+
+        if (selectedUser == null || selectedEvent == null) return;
+
+        BookingWaitlistingManager.BookingEntry booking =
+                selectedEvent.getManager().findBookingByUser(selectedUser);
+
+        if (booking == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Delete Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Booking not found.");
+            alert.showAndWait();
+            return;
+        }
+
+        boolean wasActive = booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED;
+        boolean deleted = selectedEvent.getManager().deleteBooking(selectedUser);
+
+        if (deleted) {
+            if (wasActive) {
+                selectedUser.limitingNumberDOWN();
+            }
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Booking Deleted");
+            alert.setHeaderText(null);
+            alert.setContentText("Booking removed permanently.");
+            alert.showAndWait();
+
             refreshALLBookingsTable();
         }
     }
@@ -143,26 +184,29 @@ public class HelloController implements Initializable {
         User selectedUser = findUserById(userId);
         Event selectedEvent = findEventById(eventId);
 
-        if (selectedUser != null && selectedEvent != null) {
-            if (selectedEvent.getManager().containsUser(selectedUser)) {
-                selectedUser.limitingNumberDOWN();
-            }
+        if (selectedUser == null || selectedEvent == null) return;
 
-            selectedEvent.getManager().cancelBooking(selectedUser);
+        boolean cancelled = selectedEvent.getManager().cancelBooking(selectedUser);
 
-            String message = "Success: Cancelled booking for " + selectedUser.getName() + " at " + selectedEvent.getTitle() + ".";
+        if (cancelled) {
+            selectedUser.limitingNumberDOWN();
 
-            Alert promotionAlert = new Alert(Alert.AlertType.INFORMATION);
-            promotionAlert.setTitle("System Update");
-            promotionAlert.setHeaderText("Waitlist Promotion Processed");
-            promotionAlert.setContentText(
-                    message + "\n\nNote: The first eligible user on the waitlist (if any) has been automatically promoted to Confirmed."
-            );
-            promotionAlert.showAndWait();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Booking Cancelled");
+            alert.setHeaderText(null);
+            alert.setContentText("Booking status changed to Cancelled.");
+            alert.showAndWait();
 
             refreshALLBookingsTable();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Cancel Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("No active booking found to cancel.");
+            alert.showAndWait();
         }
     }
+
 
     @FXML
     private void handleCancelEvent() {
@@ -173,49 +217,51 @@ public class HelloController implements Initializable {
         Event selectedEvent = findEventById(eventId);
         if (selectedEvent == null) return;
 
-        for (User user : selectedEvent.getManager().getUserList()) {
-            if (user != null) {
-                user.limitingNumberDOWN();
+        // Change event status
+        selectedEvent.setStatus(Event.EventStatus.CANCELLED);
+
+        // Change every booking for this event to CANCELLED
+        for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
+            if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
+                booking.setStatus(BookingWaitlistingManager.BookingStatus.CANCELLED);
+                booking.getUser().limitingNumberDOWN();
             }
         }
 
-        selectedEvent.setStatus(Event.EventStatus.CANCELLED);
-        selectedEvent.getManager().getUserList().clear();
-
         System.out.println("Logic Hook: EVENT CANCELLED -> " + selectedEvent.getTitle());
-        System.out.println("All bookings and waitlists for this event have been wiped.");
+        System.out.println("All bookings for this event are now marked as CANCELLED.");
 
         refreshALLBookingsTable();
+
+        if (eventTable != null) {
+            eventTable.refresh();
+        }
     }
 
     @FXML
     private void handleViewWaitlist() {
         String eId = waitlistEventSelection.getValue();
-
         if (eId == null) {
-            if (notificationArea != null) {
-                notificationArea.setText("SYSTEM: Please select an Event ID first.");
-            }
+            if (notificationArea != null) notificationArea.setText("SYSTEM: Please select an Event ID first.");
             return;
         }
 
         Event selectedEvent = findEventById(eId);
-
         if (selectedEvent != null) {
             StringBuilder rosterInfo = new StringBuilder();
             rosterInfo.append("--- ROSTER FOR: ").append(selectedEvent.getTitle()).append(" ---\n");
 
-            if (selectedEvent.getManager().getUserList().isEmpty()) {
-                rosterInfo.append("(No confirmed or waitlisted users for this event)");
+            if (selectedEvent.getManager().getBookings().isEmpty()) {
+                rosterInfo.append("(No bookings for this event)");
             } else {
-                for (User user : selectedEvent.getManager().getUserList()) {
-                    String status = selectedEvent.getManager().getStatus(user);
+                for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
+                    User user = booking.getUser();
                     rosterInfo.append("- ")
                             .append(user.getUserId())
                             .append(" - ")
                             .append(user.getName())
                             .append(" [")
-                            .append(status)
+                            .append(booking.getStatus())
                             .append("]\n");
                 }
             }
@@ -454,22 +500,23 @@ public class HelloController implements Initializable {
         for (Event event : allEvents) {
             BookingWaitlistingManager mgr = event.getManager();
 
-            for (User user : mgr.getUserList()) {
-                if (user != null) {
-                    displayBookings.add(new BookingRecord(
-                            mgr.getBookingID(),
-                            user.getUserId() + " - " + user.getName(),
-                            mgr.getEventID(),
-                            mgr.getCreatedAt().toString(),
-                            mgr.getStatus(user)
-                    ));
-                }
+            for (BookingWaitlistingManager.BookingEntry booking : mgr.getBookings()) {
+                User user = booking.getUser();
+
+                displayBookings.add(new BookingRecord(
+                        booking.getBookingId(),
+                        user.getUserId() + " - " + user.getName(),
+                        mgr.getEventID(),
+                        booking.getCreatedAt().toString(),
+                        booking.getStatus().toString()
+                ));
             }
         }
 
         bookingTable.setItems(displayBookings);
         bookingTable.refresh();
     }
+
 
     private String generateUserSummary(User user) {
         StringBuilder summary = new StringBuilder();
