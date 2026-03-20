@@ -1,75 +1,125 @@
 package org.example.gui;
-import java.util.ArrayList;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BookingWaitlistingManager {
-    public ArrayList<String> UserList = new ArrayList<>();
-    public int capacity;
 
-    private LocalDateTime CreatedAt;
-    private String UserID;
-    private String UserName;
-    private String EventID;
-    private String EventName;
-    private String BookingID;
+    // Store full User objects instead of just names
+    private List<User> userList = new ArrayList<>();
+    private int capacity;
+
+    private LocalDateTime createdAt;
+    private String eventId;
+    private String eventName;
+    private String bookingId;
     private String status;
 
-    //getter and setters
+    // ---------------------- CONSTRUCTOR ----------------------
 
-    //the UserID stuff seems unnecessary if all that is really needed is the Username
-    public String getUserID(int numberInList){
-        UserID = UserList.get(numberInList);
-        //would need some conversion factor here to check what the userID goes with what username, and set the new UserID to that
-        return UserID;
-    }
-    public void setUserID(String UserID){
-        this.UserID = UserID;
-    }
-    public String getUserName(int numberInList) {
-        UserName = UserList.get(numberInList);
-        return UserName;
+    public BookingWaitlistingManager(int capacity, String eventId, String eventName) {
+        this.capacity = capacity;
+        this.eventId = eventId;
+        this.eventName = eventName;
+
+        int bookingIdInt = ThreadLocalRandom.current().nextInt(999999, 10000000);
+        this.bookingId = String.valueOf(bookingIdInt);
+        this.createdAt = LocalDateTime.now();
     }
 
-    public void setUserName(String UserName){
-       this.UserName = UserName;
+    // ---------------------- GETTERS / SETTERS ----------------------
+
+    public List<User> getUserList() {
+        return userList;
     }
 
-    public String getEventID(){
-        return EventID;
+    public int getCapacity() {
+        return capacity;
     }
 
-    public void setEventID(String EventID){
-        this.EventID = EventID;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
-    public String getEventName(){
-        return EventName;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setEventName(String EventName){
-        this.EventName = EventName;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public String getBookingID(){
-        return BookingID;
+    public String getEventID() {
+        return eventId;
     }
 
-    public void setBookingID(String BookingID){
-        this.BookingID = BookingID;
+    public void setEventID(String eventId) {
+        this.eventId = eventId;
     }
 
-    public String getStatus(String user) {
-        // 1. If the name isn't even in the list, they are definitely canceled/not booked
-        if (!UserList.contains(user)) {
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    public String getBookingID() {
+        return bookingId;
+    }
+
+    public void setBookingID(String bookingId) {
+        this.bookingId = bookingId;
+    }
+
+    public String getRawStatusField() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // ---------------------- HELPER METHODS ----------------------
+
+    public User getUserByIndex(int index) {
+        if (index < 0 || index >= userList.size()) {
+            return null;
+        }
+        return userList.get(index);
+    }
+
+    public boolean containsUser(User user) {
+        if (user == null) return false;
+
+        for (User existingUser : userList) {
+            if (existingUser.getUserId().equals(user.getUserId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getStatus(User user) {
+        if (user == null) {
             return "Canceled";
         }
 
-        // 2. Find where they are in the list
-        int position = UserList.indexOf(user);
+        int position = -1;
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getUserId().equals(user.getUserId())) {
+                position = i;
+                break;
+            }
+        }
 
-        // 3. Compare their position to the capacity
-        // If they are in position 0-49 (for a 50 cap event), they are "Booked"
+        if (position == -1) {
+            return "Canceled";
+        }
+
         if (position < capacity) {
             return "Booked";
         } else {
@@ -77,68 +127,57 @@ public class BookingWaitlistingManager {
         }
     }
 
-    public void setStatus(String status){
-        this.status = status;
+    public String getStatusByUserId(String userId) {
+        for (User user : userList) {
+            if (user.getUserId().equals(userId)) {
+                return getStatus(user);
+            }
+        }
+        return "Canceled";
     }
 
-    public LocalDateTime getCreatedAt(){
-        return CreatedAt;
-    }
+    // ---------------------- MAIN LOGIC ----------------------
 
-    public void setCreatedAt(LocalDateTime CreatedAt){
-        this.CreatedAt = CreatedAt;
-    }
-
-
-    //constructor
-    public BookingWaitlistingManager (int capacity, String EventID, String EventName){
-        this.capacity = capacity;
-        this.EventID = EventID;
-        this.EventName = EventName;
-
-        int BookingIDInt = ThreadLocalRandom.current().nextInt(999999, 10000000);
-        BookingID = String.valueOf(BookingIDInt);
-        CreatedAt = LocalDateTime.now();
-       // UserList.add(null);
-    }
-
-    //methods
-    // Fixed: Changed (i+1) infinite loop to check actual list size
-    public void addUser(String enteredUserName) {
-        if (UserList.contains(enteredUserName)) {
-            System.out.println("User Is Already Listed");
+    public void addUser(User user) {
+        if (user == null) {
+            System.out.println("Cannot add null user.");
             return;
         }
-        UserList.add(enteredUserName);
+
+        if (containsUser(user)) {
+            System.out.println("User is already listed.");
+            return;
+        }
+
+        userList.add(user);
     }
 
-    public void cancelBooking(String enteredUserName){
-        // no need a loop to remove someone, arraylist are smart
-        UserList.remove(enteredUserName);
+    public void cancelBooking(User user) {
+        if (user == null) return;
+
+        userList.removeIf(existingUser -> existingUser.getUserId().equals(user.getUserId()));
     }
 
-    //note that a lot of the prints in this part will need to be printed/shown in the UI later not in the terminal
-    public void bookWaitlistPrint(){
-        System.out.println("Event Name/ID: " + EventName + "/" + EventID);
-        System.out.println("Booking ID: " + BookingID);
-        System.out.println("Event Created On: " + CreatedAt);
+    public void bookWaitlistPrint() {
+        System.out.println("Event Name/ID: " + eventName + "/" + eventId);
+        System.out.println("Booking ID: " + bookingId);
+        System.out.println("Event Created On: " + createdAt);
 
-        System.out.println("Users Booked: ");
-        // Math.min forces it to stop checking if the list is shorter than the capacity
-        int confirmedCount = Math.min(capacity + 1, UserList.size());
+        System.out.println("Users Booked:");
+        int confirmedCount = Math.min(capacity, userList.size());
         for (int i = 0; i < confirmedCount; i++) {
-            if (UserList.get(i) != null){
-                System.out.println(UserList.get(i));
+            User user = userList.get(i);
+            if (user != null) {
+                System.out.println(user.getUserId() + " - " + user.getName());
             }
         }
 
-        System.out.println("Users Waitlisted: ");
-        // This safely prints anyone who got added after capacity was reached
-        for (int j = capacity + 1; j < UserList.size(); j++){
-            if (UserList.get(j) != null){
-                System.out.println(UserList.get(j));
+        System.out.println("Users Waitlisted:");
+        for (int i = capacity; i < userList.size(); i++) {
+            User user = userList.get(i);
+            if (user != null) {
+                System.out.println(user.getUserId() + " - " + user.getName());
             }
         }
     }
-
 }

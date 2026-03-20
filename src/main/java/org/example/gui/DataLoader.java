@@ -19,19 +19,25 @@ public class DataLoader {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine();
+            br.readLine(); // skip header
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
+
+                if (data.length < 4) continue;
 
                 String id = data[0].trim();
                 String name = data[1].trim();
                 String email = data[2].trim();
                 String type = data[3].trim().toUpperCase();
 
-                if (type.equals("STUDENT")) userList.add(new Student(id, name, email));
-                else if (type.equals("STAFF")) userList.add(new Staff(id, name, email));
-                else if (type.equals("GUEST")) userList.add(new Guest(id, name, email));
+                if (type.equals("STUDENT")) {
+                    userList.add(new Student(id, name, email));
+                } else if (type.equals("STAFF")) {
+                    userList.add(new Staff(id, name, email));
+                } else if (type.equals("GUEST")) {
+                    userList.add(new Guest(id, name, email));
+                }
             }
 
         } catch (IOException e) {
@@ -49,10 +55,17 @@ public class DataLoader {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine();
+            br.readLine(); // skip header
 
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
+                if (line.trim().isEmpty()) continue;
+
+                String[] data = line.split(",", -1);
+
+                if (data.length < 10) {
+                    System.out.println("Skipping bad event row: " + line);
+                    continue;
+                }
 
                 String id = data[0].trim();
                 String title = data[1].trim();
@@ -61,10 +74,16 @@ public class DataLoader {
                 int cap = Integer.parseInt(data[4].trim());
                 String type = data[6].trim().toUpperCase();
 
-                if (type.equals("WORKSHOP")) eventList.add(new Workshop(id, title, time, loc, cap, data[7].trim()));
-                else if (type.equals("SEMINAR")) eventList.add(new Seminar(id, title, time, loc, cap, data[8].trim()));
-                else if (type.equals("CONCERT")) eventList.add(new Concert(id, title, time, loc, cap, data[9].trim()));
+                if (type.equals("WORKSHOP")) {
+                    eventList.add(new Workshop(id, title, time, loc, cap, data[7].trim()));
+                } else if (type.equals("SEMINAR")) {
+                    eventList.add(new Seminar(id, title, time, loc, cap, data[8].trim()));
+                } else if (type.equals("CONCERT")) {
+                    eventList.add(new Concert(id, title, time, loc, cap, data[9].trim()));
+                }
             }
+
+            System.out.println("Events loaded: " + eventList.size());
 
         } catch (IOException e) {
             System.out.println("Error loading events: " + e.getMessage());
@@ -81,10 +100,12 @@ public class DataLoader {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine();
+            br.readLine(); // skip header
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
+
+                if (data.length < 5) continue;
 
                 String userId = data[1].trim();
                 String eventId = data[2].trim();
@@ -106,8 +127,10 @@ public class DataLoader {
                 }
 
                 if (targetUser != null && targetEvent != null) {
-                    targetEvent.getManager().addUser(targetUser.getName());
-                    targetUser.limitingNumberUP();
+                    if (!targetEvent.getManager().containsUser(targetUser)) {
+                        targetEvent.getManager().addUser(targetUser);
+                        targetUser.limitingNumberUP();
+                    }
                 }
             }
 
