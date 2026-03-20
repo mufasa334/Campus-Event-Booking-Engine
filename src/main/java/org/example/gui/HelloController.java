@@ -108,6 +108,12 @@ public class HelloController implements Initializable {
         User selectedUser = findUserById(uId);
         Event selectedEvent = findEventById(eId);
 
+        //Disables booking for cancelled events
+        if(selectedEvent.getStatus() == Event.EventStatus.CANCELLED) {
+            System.out.println("This Event Has Been Cancelled");
+            return;
+        }
+
         //Limits the number of bookings depending on the UserType
         if (selectedUser.getUserType() == GUEST){
             if(selectedUser.getLimitingInt() >= 1){
