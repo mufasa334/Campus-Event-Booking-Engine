@@ -352,6 +352,34 @@ public class HelloController implements Initializable {
         String name = nameField.getText();
         String type = roleComboBox.getValue();
 
+        //Input checking so you can not just enter random values
+        //User ID check
+        String shortId = id.substring(1);
+        int countUp = 0;
+
+        if(id.charAt(0) != 'U'){
+            System.out.println("The User ID is Invalid needs a starting U");
+            return;
+        }
+        for(int i = 0; i < shortId.length(); i++) {
+            for (char j = '0'; j <= '9'; j++){
+            if (shortId.charAt(i) != j){
+                countUp++;
+            }
+            }
+            if (countUp == 10){
+                System.out.println("The User ID is Invalid needs to only have numbers after the first U");
+                return;
+            }
+            countUp = 0;
+        }
+
+        //Email check
+        if(emailField.getText().contains("@") == false){
+            System.out.println("The Email is Invalid needs a @ symbol");
+            return;
+        }
+
         if (id == null || type == null || id.isEmpty()) return;
 
         if (findUserById(id) != null) {
@@ -378,6 +406,28 @@ public class HelloController implements Initializable {
     private void AddEvent() {
         String eId = eventIdField.getText();
         String type = eventTypeDropdown.getValue();
+
+        //Input checking so you can't just enter random values
+        //Event ID check
+        String shortEID = eId.substring(1);
+        int countUp2 = 0;
+
+        if(eId.charAt(0) != 'E'){
+            System.out.println("The Event ID is Invalid needs a starting E");
+            return;
+        }
+        for(int i = 0; i < shortEID.length(); i++) {
+            for (char j = '0'; j <= '9'; j++){
+                if (shortEID.charAt(i) != j){
+                    countUp2++;
+                }
+            }
+            if (countUp2 == 10){
+                System.out.println("The Event ID is Invalid needs to only have numbers after the first E");
+                return;
+            }
+            countUp2 = 0;
+        }
 
         if (eId == null || eId.isEmpty() || type == null) {
             System.out.println("Warning: Event ID and Type are required.");
