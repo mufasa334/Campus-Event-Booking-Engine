@@ -53,6 +53,10 @@ public class HelloController implements Initializable {
     @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus;
     @FXML private TableColumn<Event, Integer> colEventCapacity;
 
+    @FXML private TableView<BookingRecord> waitlistTable;
+    @FXML private TableColumn<BookingRecord, String> colWaitUser;
+    @FXML private TableColumn<BookingRecord, String> colWaitStatus;
+
     private static ObservableList<Event> allEvents = FXCollections.observableArrayList();
     private static ObservableList<User> allUsers = FXCollections.observableArrayList();
     private static boolean isSidebarVisible = true;
@@ -241,36 +245,52 @@ public class HelloController implements Initializable {
     @FXML
     private void handleViewWaitlist() {
         String eId = waitlistEventSelection.getValue();
+
         if (eId == null) {
-            if (notificationArea != null) notificationArea.setText("SYSTEM: Please select an Event ID first.");
+            if (notificationArea != null) {
+                notificationArea.setText("SYSTEM: Please select an Event ID first.");
+            }
             return;
         }
 
         Event selectedEvent = findEventById(eId);
-        if (selectedEvent != null) {
-            StringBuilder rosterInfo = new StringBuilder();
-            rosterInfo.append("--- ROSTER FOR: ").append(selectedEvent.getTitle()).append(" ---\n");
+        if (selectedEvent == null) return;
 
-            if (selectedEvent.getManager().getBookings().isEmpty()) {
-                rosterInfo.append("(No bookings for this event)");
-            } else {
-                for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
-                    User user = booking.getUser();
-                    rosterInfo.append("- ")
-                            .append(user.getUserId())
-                            .append(" - ")
-                            .append(user.getName())
-                            .append(" [")
-                            .append(booking.getStatus())
-                            .append("]\n");
-                }
+        refreshWaitlistTable(selectedEvent);
+
+        StringBuilder rosterInfo = new StringBuilder();
+        rosterInfo.append("--- WAITLIST FOR: ")
+                .append(selectedEvent.getTitle())
+                .append(" ---\n\n");
+
+        boolean hasWaitlisted = false;
+
+        for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
+
+            // Show only WAITLISTED bookings
+            if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.WAITLISTED) {
+                continue;
             }
 
-            if (notificationArea != null) {
-                notificationArea.setText(rosterInfo.toString());
-            }
+            User user = booking.getUser();
 
-            refreshALLBookingsTable();
+            rosterInfo.append("- ")
+                    .append(user.getUserId())
+                    .append(" - ")
+                    .append(user.getName())
+                    .append(" [")
+                    .append(booking.getStatus())
+                    .append("]\n");
+
+            hasWaitlisted = true;
+        }
+
+        if (!hasWaitlisted) {
+            rosterInfo.append("(No users are currently waitlisted for this event)");
+        }
+
+        if (notificationArea != null) {
+            notificationArea.setText(rosterInfo.toString());
         }
     }
 
@@ -501,6 +521,7 @@ public class HelloController implements Initializable {
             BookingWaitlistingManager mgr = event.getManager();
 
             for (BookingWaitlistingManager.BookingEntry booking : mgr.getBookings()) {
+
                 User user = booking.getUser();
 
                 displayBookings.add(new BookingRecord(
@@ -516,7 +537,36 @@ public class HelloController implements Initializable {
         bookingTable.setItems(displayBookings);
         bookingTable.refresh();
     }
+    //same thing but for waitlist table instead
+    private void refreshWaitlistTable(Event event) {
+        if (waitlistTable == null || colWaitUser == null || colWaitStatus == null) return;
 
+        colWaitUser.setCellValueFactory(new PropertyValueFactory<>("userName"));
+        colWaitStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        ObservableList<BookingRecord> waitlistData = FXCollections.observableArrayList();
+
+        for (BookingWaitlistingManager.BookingEntry booking : event.getManager().getBookings()) {
+
+            // Show only WAITLISTED bookings
+            if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.WAITLISTED) {
+                continue;
+            }
+
+            User user = booking.getUser();
+
+            waitlistData.add(new BookingRecord(
+                    booking.getBookingId(),
+                    user.getUserId() + " - " + user.getName(),
+                    event.getEventId(),
+                    booking.getCreatedAt().toString(),
+                    booking.getStatus().toString()
+            ));
+        }
+
+        waitlistTable.setItems(waitlistData);
+        waitlistTable.refresh();
+    }
 
     private String generateUserSummary(User user) {
         StringBuilder summary = new StringBuilder();

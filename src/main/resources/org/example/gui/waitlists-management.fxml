@@ -12,30 +12,53 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <VBox alignment="TOP_CENTER" layoutY="71.0" minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <VBox alignment="TOP_CENTER"
+              AnchorPane.topAnchor="10.0"
+              AnchorPane.bottomAnchor="10.0"
+              AnchorPane.leftAnchor="10.0"
+              AnchorPane.rightAnchor="10.0"
+              spacing="12.0">
+
             <padding>
-                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
             </padding>
+
             <children>
-                <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
                     <children>
-                        <ComboBox fx:id="waitlistEventSelection" prefWidth="150.0" promptText="Select Event" />
-                        <Button mnemonicParsing="false" onAction="#handleViewWaitlist" prefHeight="25.0" text="View Waitlist" />
+                        <ComboBox fx:id="waitlistEventSelection"
+                                  prefWidth="220.0"
+                                  promptText="Select Event" />
+
+                        <Button text="View Waitlist"
+                                mnemonicParsing="false"
+                                onAction="#handleViewWaitlist"
+                                prefWidth="120.0" />
                     </children>
                 </HBox>
-                <TableView fx:id="bookingTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
+
+                <TableView fx:id="waitlistTable"
+                           prefHeight="220.0"
+                           VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="colBookId" prefWidth="75.0" text="Booking ID" />
-                        <TableColumn fx:id="colBookUser" prefWidth="75.0" text="User Name" />
-                        <TableColumn fx:id="colBookEvent" prefWidth="75.0" text="Event ID" />
-                        <TableColumn fx:id="colBookTime" prefWidth="109.0" text="Created At" />
-                        <TableColumn fx:id="colBookStatus" prefWidth="75.0" text="Status" />
+                        <TableColumn fx:id="colWaitUser"
+                                     text="User" />
+                        <TableColumn fx:id="colWaitStatus"
+                                     text="Status" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
-                <TextArea fx:id="notificationArea" editable="false" prefHeight="66.0" prefWidth="478.0" text="System Notifications will appear here..." />
+
+                <TextArea fx:id="notificationArea"
+                          editable="false"
+                          wrapText="true"
+                          prefHeight="160.0"
+                          text="System Notifications will appear here..."
+                          VBox.vgrow="ALWAYS" />
+
             </children>
         </VBox>
     </children>
