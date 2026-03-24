@@ -21,17 +21,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import static org.example.gui.User.UserType.GUEST;
-import static org.example.gui.User.UserType.STAFF;
-import static org.example.gui.User.UserType.STUDENT;
-
 public class HelloController implements Initializable {
 
     @FXML private TextArea notificationArea;
     @FXML private TableView<BookingRecord> bookingTable;
     @FXML private TableColumn<BookingRecord, String> colBookId, colBookUser, colBookEvent, colBookTime, colBookStatus;
-
-    private static ObservableList<BookingRecord> displayBookings = FXCollections.observableArrayList();
 
     @FXML private AnchorPane sidebarContainer;
     @FXML private AnchorPane contentArea;
@@ -57,8 +51,9 @@ public class HelloController implements Initializable {
     @FXML private TableColumn<BookingRecord, String> colWaitUser;
     @FXML private TableColumn<BookingRecord, String> colWaitStatus;
 
-    private static ObservableList<Event> allEvents = FXCollections.observableArrayList();
-    private static ObservableList<User> allUsers = FXCollections.observableArrayList();
+    private static final ObservableList<BookingRecord> displayBookings = FXCollections.observableArrayList();
+    private static final ObservableList<Event> allEvents = FXCollections.observableArrayList();
+    private static final ObservableList<User> allUsers = FXCollections.observableArrayList();
     private static boolean isSidebarVisible = true;
 
     @Override
@@ -77,6 +72,7 @@ public class HelloController implements Initializable {
             DataLoader.loadBookings(allUsers, allEvents);
         }
 
+        refreshAllEventStatuses();
         setupUserTable();
         setupEventTable();
         refreshALLBookingsTable();
@@ -86,6 +82,97 @@ public class HelloController implements Initializable {
             bookingTable.setItems(displayBookings);
         }
     }
+
+    // =========================================================
+    // BOOKING LIMIT + STATUS LOGIC
+    // =========================================================
+
+    private int getConfirmedBookingCount(User user) {
+        int count = 0;
+
+        for (Event event : allEvents) {
+            BookingWaitlistingManager.BookingEntry booking =
+                    event.getManager().findBookingByUser(user);
+
+            if (booking != null &&
+                    booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private int getConfirmedBookingCountExcludingEvent(User user, Event excludedEvent) {
+        int count = 0;
+
+        for (Event event : allEvents) {
+            if (event == excludedEvent) continue;
+
+            BookingWaitlistingManager.BookingEntry booking =
+                    event.getManager().findBookingByUser(user);
+
+            if (booking != null &&
+                    booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private boolean eventHasConfirmedSpace(Event event) {
+        int confirmedCount = 0;
+
+        for (BookingWaitlistingManager.BookingEntry booking : event.getManager().getBookings()) {
+            if (booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED) {
+                confirmedCount++;
+            }
+        }
+
+        return confirmedCount < event.getManager().getCapacity();
+    }
+
+    private void refreshAllEventStatuses() {
+        for (Event event : allEvents) {
+            refreshSingleEventStatuses(event);
+        }
+    }
+
+    private void refreshSingleEventStatuses(Event event) {
+        BookingWaitlistingManager manager = event.getManager();
+
+        for (BookingWaitlistingManager.BookingEntry booking : manager.getBookings()) {
+            if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
+                booking.setStatus(BookingWaitlistingManager.BookingStatus.WAITLISTED);
+            }
+        }
+
+        java.util.List<BookingWaitlistingManager.BookingEntry> activeBookings =
+                manager.getBookings().stream()
+                        .filter(b -> b.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED)
+                        .sorted(java.util.Comparator.comparing(BookingWaitlistingManager.BookingEntry::getCreatedAt))
+                        .toList();
+
+        int confirmedCountForEvent = 0;
+
+        for (BookingWaitlistingManager.BookingEntry booking : activeBookings) {
+            User user = booking.getUser();
+            int userConfirmedElsewhere = getConfirmedBookingCountExcludingEvent(user, event);
+
+            if (confirmedCountForEvent < manager.getCapacity()
+                    && userConfirmedElsewhere < user.getMaxConfirmedBookings()) {
+                booking.setStatus(BookingWaitlistingManager.BookingStatus.CONFIRMED);
+                confirmedCountForEvent++;
+            } else {
+                booking.setStatus(BookingWaitlistingManager.BookingStatus.WAITLISTED);
+            }
+        }
+    }
+
+    // =========================================================
+    // BOOKING ACTIONS
+    // =========================================================
 
     @FXML
     private void handleCreateBooking() {
@@ -99,44 +186,36 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
-        if (selectedUser.getUserType() == GUEST) {
-            if (selectedUser.getLimitingInt() >= 1) {
-                System.out.println("Maximum Bookings Reached");
-                return;
-            }
-        } else if (selectedUser.getUserType() == STUDENT) {
-            if (selectedUser.getLimitingInt() >= 3) {
-                System.out.println("Maximum Bookings Reached");
-                return;
-            }
-        } else if (selectedUser.getUserType() == STAFF) {
-            if (selectedUser.getLimitingInt() >= 5) {
-                System.out.println("Maximum Bookings Reached");
-                return;
-            }
-        }
-
         if (selectedEvent.getManager().containsUser(selectedUser)) {
             System.out.println("User is already booked or waitlisted for this event.");
             return;
         }
 
+        int confirmedCount = getConfirmedBookingCount(selectedUser);
+        boolean eventHasSpace = eventHasConfirmedSpace(selectedEvent);
+
+        // Only block if the user is trying to take a confirmed spot immediately
+        if (eventHasSpace && confirmedCount >= selectedUser.getMaxConfirmedBookings()) {
+            System.out.println("Maximum Confirmed Bookings Reached");
+            return;
+        }
+
         selectedEvent.getManager().addUser(selectedUser);
+        refreshAllEventStatuses();
 
-        System.out.println("DEBUG: Booked " + selectedUser.getName() + " for " + selectedEvent.getEventId());
-        System.out.println("DEBUG: Current List Size: " + selectedEvent.getManager().getBookings().size());
+        BookingWaitlistingManager.BookingEntry booking =
+                selectedEvent.getManager().findBookingByUser(selectedUser);
 
-        selectedUser.limitingNumberUP();
+        if (booking != null) {
+            System.out.println("DEBUG: Booked " + selectedUser.getName() +
+                    " for " + selectedEvent.getEventId());
+            System.out.println("DEBUG: Status = " + booking.getStatus());
+        }
+
         refreshALLBookingsTable();
     }
 
     @FXML
-    private void handleDropdownChange() {
-        if (bookingEventSelection != null && bookingEventSelection.getValue() != null) {
-            refreshALLBookingsTable();
-        }
-    }
-    @FXML// Delete feature might need a button or something for this use
     private void handleDeleteBooking() {
         String userId = bookingUserSelection.getValue();
         String eventId = bookingEventSelection.getValue();
@@ -160,20 +239,16 @@ public class HelloController implements Initializable {
             return;
         }
 
-        boolean wasActive = booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED;
         boolean deleted = selectedEvent.getManager().deleteBooking(selectedUser);
 
         if (deleted) {
-            if (wasActive) {
-                selectedUser.limitingNumberDOWN();
-            }
-
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Booking Deleted");
             alert.setHeaderText(null);
             alert.setContentText("Booking removed permanently.");
             alert.showAndWait();
 
+            refreshAllEventStatuses();
             refreshALLBookingsTable();
         }
     }
@@ -193,14 +268,13 @@ public class HelloController implements Initializable {
         boolean cancelled = selectedEvent.getManager().cancelBooking(selectedUser);
 
         if (cancelled) {
-            selectedUser.limitingNumberDOWN();
-
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Booking Cancelled");
             alert.setHeaderText(null);
             alert.setContentText("Booking status changed to Cancelled.");
             alert.showAndWait();
 
+            refreshAllEventStatuses();
             refreshALLBookingsTable();
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -211,7 +285,6 @@ public class HelloController implements Initializable {
         }
     }
 
-
     @FXML
     private void handleCancelEvent() {
         String eventId = waitlistEventSelection.getValue();
@@ -221,24 +294,29 @@ public class HelloController implements Initializable {
         Event selectedEvent = findEventById(eventId);
         if (selectedEvent == null) return;
 
-        // Change event status
         selectedEvent.setStatus(Event.EventStatus.CANCELLED);
 
-        // Change every booking for this event to CANCELLED
         for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.CANCELLED);
-                booking.getUser().limitingNumberDOWN();
             }
         }
 
         System.out.println("Logic Hook: EVENT CANCELLED -> " + selectedEvent.getTitle());
         System.out.println("All bookings for this event are now marked as CANCELLED.");
 
+        refreshAllEventStatuses();
         refreshALLBookingsTable();
 
         if (eventTable != null) {
             eventTable.refresh();
+        }
+    }
+
+    @FXML
+    private void handleDropdownChange() {
+        if (bookingEventSelection != null && bookingEventSelection.getValue() != null) {
+            refreshALLBookingsTable();
         }
     }
 
@@ -266,8 +344,6 @@ public class HelloController implements Initializable {
         boolean hasWaitlisted = false;
 
         for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
-
-            // Show only WAITLISTED bookings
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.WAITLISTED) {
                 continue;
             }
@@ -294,6 +370,10 @@ public class HelloController implements Initializable {
         }
     }
 
+    // =========================================================
+    // FINDERS
+    // =========================================================
+
     public User findUserById(String id) {
         return allUsers.stream()
                 .filter(u -> u.getUserId().equals(id))
@@ -307,6 +387,10 @@ public class HelloController implements Initializable {
                 .findFirst()
                 .orElse(null);
     }
+
+    // =========================================================
+    // TABLE SETUP
+    // =========================================================
 
     private void setupUserTable() {
         if (userTable != null && colUserId != null) {
@@ -341,6 +425,10 @@ public class HelloController implements Initializable {
         }
     }
 
+    // =========================================================
+    // DROPDOWNS
+    // =========================================================
+
     private void fillAllDropdowns() {
         if (roleComboBox != null) {
             roleComboBox.setItems(FXCollections.observableArrayList("Student", "Staff", "Guest"));
@@ -366,41 +454,43 @@ public class HelloController implements Initializable {
         if (waitlistEventSelection != null) waitlistEventSelection.setItems(eventIds);
     }
 
+    // =========================================================
+    // USER + EVENT CREATION
+    // =========================================================
+
     @FXML
     private void AddUser() {
         String id = idField.getText();
         String name = nameField.getText();
         String type = roleComboBox.getValue();
 
-        //Input checking so you can not just enter random values
-        //User ID check
+        if (id == null || id.isEmpty() || type == null) return;
+
         String shortId = id.substring(1);
         int countUp = 0;
 
-        if(id.charAt(0) != 'U'){
+        if (id.charAt(0) != 'U') {
             System.out.println("The User ID is Invalid needs a starting U");
             return;
         }
-        for(int i = 0; i < shortId.length(); i++) {
-            for (char j = '0'; j <= '9'; j++){
-            if (shortId.charAt(i) != j){
-                countUp++;
+
+        for (int i = 0; i < shortId.length(); i++) {
+            for (char j = '0'; j <= '9'; j++) {
+                if (shortId.charAt(i) != j) {
+                    countUp++;
+                }
             }
-            }
-            if (countUp == 10){
+            if (countUp == 10) {
                 System.out.println("The User ID is Invalid needs to only have numbers after the first U");
                 return;
             }
             countUp = 0;
         }
 
-        //Email check
-        if(emailField.getText().contains("@") == false){
+        if (!emailField.getText().contains("@")) {
             System.out.println("The Email is Invalid needs a @ symbol");
             return;
         }
-
-        if (id == null || type == null || id.isEmpty()) return;
 
         if (findUserById(id) != null) {
             System.out.println("Error: User ID '" + id + "' already exists! Blocked.");
@@ -427,31 +517,30 @@ public class HelloController implements Initializable {
         String eId = eventIdField.getText();
         String type = eventTypeDropdown.getValue();
 
-        //Input checking so you can't just enter random values
-        //Event ID check
+        if (eId == null || eId.isEmpty() || type == null) {
+            System.out.println("Warning: Event ID and Type are required.");
+            return;
+        }
+
         String shortEID = eId.substring(1);
         int countUp2 = 0;
 
-        if(eId.charAt(0) != 'E'){
+        if (eId.charAt(0) != 'E') {
             System.out.println("The Event ID is Invalid needs a starting E");
             return;
         }
-        for(int i = 0; i < shortEID.length(); i++) {
-            for (char j = '0'; j <= '9'; j++){
-                if (shortEID.charAt(i) != j){
+
+        for (int i = 0; i < shortEID.length(); i++) {
+            for (char j = '0'; j <= '9'; j++) {
+                if (shortEID.charAt(i) != j) {
                     countUp2++;
                 }
             }
-            if (countUp2 == 10){
+            if (countUp2 == 10) {
                 System.out.println("The Event ID is Invalid needs to only have numbers after the first E");
                 return;
             }
             countUp2 = 0;
-        }
-
-        if (eId == null || eId.isEmpty() || type == null) {
-            System.out.println("Warning: Event ID and Type are required.");
-            return;
         }
 
         if (findEventById(eId) != null) {
@@ -469,6 +558,7 @@ public class HelloController implements Initializable {
                     : new Concert(eId, eventTitleField.getText(), java.time.LocalDateTime.now(), "TBD", cap, specificAttributeField.getText());
 
             allEvents.add(newEvent);
+            refreshAllEventStatuses();
 
             System.out.println("SUCCESS: " + newEvent.getTitle() + " added to the system.");
 
@@ -485,6 +575,10 @@ public class HelloController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    // =========================================================
+    // VIEW SWITCHING
+    // =========================================================
 
     @FXML public void showUserManagement() { switchView("user-management.fxml"); }
     @FXML public void showEventsManagement() { switchView("events-management.fxml"); }
@@ -517,6 +611,10 @@ public class HelloController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    // =========================================================
+    // APP CONTROLS
+    // =========================================================
 
     @FXML
     public void toggleSidebar() {
@@ -556,6 +654,10 @@ public class HelloController implements Initializable {
         System.out.println("Manual save triggered by user.");
     }
 
+    // =========================================================
+    // BOOKING / WAITLIST TABLES
+    // =========================================================
+
     private void refreshALLBookingsTable() {
         if (bookingTable == null || colBookId == null) return;
 
@@ -571,7 +673,6 @@ public class HelloController implements Initializable {
             BookingWaitlistingManager mgr = event.getManager();
 
             for (BookingWaitlistingManager.BookingEntry booking : mgr.getBookings()) {
-
                 User user = booking.getUser();
 
                 displayBookings.add(new BookingRecord(
@@ -587,7 +688,7 @@ public class HelloController implements Initializable {
         bookingTable.setItems(displayBookings);
         bookingTable.refresh();
     }
-    //same thing but for waitlist table instead
+
     private void refreshWaitlistTable(Event event) {
         if (waitlistTable == null || colWaitUser == null || colWaitStatus == null) return;
 
@@ -597,8 +698,6 @@ public class HelloController implements Initializable {
         ObservableList<BookingRecord> waitlistData = FXCollections.observableArrayList();
 
         for (BookingWaitlistingManager.BookingEntry booking : event.getManager().getBookings()) {
-
-            // Show only WAITLISTED bookings
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.WAITLISTED) {
                 continue;
             }
@@ -617,6 +716,10 @@ public class HelloController implements Initializable {
         waitlistTable.setItems(waitlistData);
         waitlistTable.refresh();
     }
+
+    // =========================================================
+    // PROFILE / SUMMARY HELPERS
+    // =========================================================
 
     private String generateUserSummary(User user) {
         StringBuilder summary = new StringBuilder();
@@ -699,12 +802,16 @@ public class HelloController implements Initializable {
         return sb.toString();
     }
 
+    // =========================================================
+    // TABLE RECORD
+    // =========================================================
+
     public static class BookingRecord {
-        private String bookingId;
-        private String userName;
-        private String eventId;
-        private String createdAt;
-        private String status;
+        private final String bookingId;
+        private final String userName;
+        private final String eventId;
+        private final String createdAt;
+        private final String status;
 
         public BookingRecord(String bookingId, String userName, String eventId, String createdAt, String status) {
             this.bookingId = bookingId;

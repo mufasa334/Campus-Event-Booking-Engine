@@ -142,9 +142,7 @@ public class DataLoader {
                 }
             }
 
-            for (Event event : eventList) {
-                event.getManager().refreshStatuses();
-            }
+
 
         } catch (IOException e) {
             System.out.println("Error loading bookings: " + e.getMessage());

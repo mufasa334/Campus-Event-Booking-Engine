@@ -13,7 +13,7 @@ public class BookingWaitlistingManager {
         CANCELLED
     }
 
-    public static class BookingEntry {
+    public class BookingEntry {
         private String bookingId;
         private User user;
         private LocalDateTime createdAt;
@@ -26,33 +26,16 @@ public class BookingWaitlistingManager {
             this.status = BookingStatus.WAITLISTED;
         }
 
-        public String getBookingId() {
-            return bookingId;
-        }
+        public String getBookingId() { return bookingId; }
+        public void setBookingId(String bookingId) { this.bookingId = bookingId; }
 
-        public void setBookingId(String bookingId) {
-            this.bookingId = bookingId;
-        }
+        public User getUser() { return user; }
 
-        public User getUser() {
-            return user;
-        }
+        public LocalDateTime getCreatedAt() { return createdAt; }
+        public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-        public LocalDateTime getCreatedAt() {
-            return createdAt;
-        }
-
-        public void setCreatedAt(LocalDateTime createdAt) {
-            this.createdAt = createdAt;
-        }
-
-        public BookingStatus getStatus() {
-            return status;
-        }
-
-        public void setStatus(BookingStatus status) {
-            this.status = status;
-        }
+        public BookingStatus getStatus() { return status; }
+        public void setStatus(BookingStatus status) { this.status = status; }
     }
 
     private List<BookingEntry> bookings = new ArrayList<>();
@@ -69,30 +52,23 @@ public class BookingWaitlistingManager {
         this.createdAt = LocalDateTime.now();
     }
 
-    public List<BookingEntry> getBookings() {
-        return bookings;
-    }
+    // ==============================
+    // BASIC GETTERS
+    // ==============================
 
-    public int getCapacity() {
-        return capacity;
-    }
+    public List<BookingEntry> getBookings() { return bookings; }
+    public int getCapacity() { return capacity; }
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-        refreshStatuses();
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public String getEventID() { return eventId; }
+    public String getEventName() { return eventName; }
 
-    public String getEventID() {
-        return eventId;
-    }
-
-    public String getEventName() {
-        return eventName;
-    }
+    // ==============================
+    // CORE FUNCTIONS
+    // ==============================
 
     public boolean containsUser(User user) {
         if (user == null) return false;
@@ -109,12 +85,20 @@ public class BookingWaitlistingManager {
     public BookingEntry findBookingByUser(User user) {
         if (user == null) return null;
 
+        BookingEntry cancelledMatch = null;
+
         for (BookingEntry booking : bookings) {
             if (booking.getUser().getUserId().equals(user.getUserId())) {
-                return booking;
+
+                if (booking.getStatus() != BookingStatus.CANCELLED) {
+                    return booking; // prefer active booking
+                }
+
+                cancelledMatch = booking;
             }
         }
-        return null;
+
+        return cancelledMatch;
     }
 
     public void addUser(User user) {
@@ -123,14 +107,25 @@ public class BookingWaitlistingManager {
             return;
         }
 
-        if (containsUser(user)) {
-            System.out.println("User already has an active booking.");
-            return;
+        for (BookingEntry booking : bookings) {
+            if (booking.getUser().getUserId().equals(user.getUserId())) {
+
+                if (booking.getStatus() != BookingStatus.CANCELLED) {
+                    System.out.println("User already has an active booking.");
+                    return;
+                }
+
+                // Rebook = treat like a new request at the end of the queue
+                booking.setCreatedAt(LocalDateTime.now());
+                booking.setStatus(BookingStatus.WAITLISTED);
+
+                bookings.remove(booking);
+                bookings.add(booking);
+                return;
+            }
         }
 
-        BookingEntry booking = new BookingEntry(user);
-        bookings.add(booking);
-        refreshStatuses();
+        bookings.add(new BookingEntry(user));
     }
 
     public void addLoadedBooking(User user, String bookingId, LocalDateTime createdAt, BookingStatus status) {
@@ -148,7 +143,6 @@ public class BookingWaitlistingManager {
         if (booking.getStatus() == BookingStatus.CANCELLED) return false;
 
         booking.setStatus(BookingStatus.CANCELLED);
-        refreshStatuses();
         return true;
     }
 
@@ -157,11 +151,7 @@ public class BookingWaitlistingManager {
 
         if (booking == null) return false;
 
-        boolean removed = bookings.remove(booking);
-        if (removed) {
-            refreshStatuses();
-        }
-        return removed;
+        return bookings.remove(booking);
     }
 
     public String getStatus(User user) {
@@ -175,26 +165,12 @@ public class BookingWaitlistingManager {
         };
     }
 
-    public void refreshStatuses() {
-        int confirmedCount = 0;
-
-        for (BookingEntry booking : bookings) {
-            if (booking.getStatus() == BookingStatus.CANCELLED) {
-                continue;
-            }
-
-            if (confirmedCount < capacity) {
-                booking.setStatus(BookingStatus.CONFIRMED);
-                confirmedCount++;
-            } else {
-                booking.setStatus(BookingStatus.WAITLISTED);
-            }
-        }
-    }
+    // ==============================
+    // DEBUG PRINT
+    // ==============================
 
     public void bookWaitlistPrint() {
         System.out.println("Event Name/ID: " + eventName + "/" + eventId);
-        System.out.println("Event Created On: " + createdAt);
 
         for (BookingEntry booking : bookings) {
             System.out.println(
