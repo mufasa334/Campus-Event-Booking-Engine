@@ -18,6 +18,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -422,6 +423,18 @@ public class HelloController implements Initializable {
             colEventType.setCellValueFactory(new PropertyValueFactory<>("eventType"));
             colEventStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
             eventTable.setItems(allEvents);
+
+            eventTable.setOnMouseClicked(event -> {
+                Event selectedEvent = eventTable.getSelectionModel().getSelectedItem();
+                if (selectedEvent != null && event.getClickCount() == 1) {
+                    Alert profile = new Alert(Alert.AlertType.INFORMATION);
+                    profile.setTitle("Event Profile Details");
+                    profile.setHeaderText("Event Summary: " + selectedEvent.getTitle());
+                    profile.setContentText(getEventProfileSummary(selectedEvent));
+                    profile.showAndWait();
+                    userTable.getSelectionModel().clearSelection();
+                }
+            });
         }
     }
 
@@ -797,6 +810,33 @@ public class HelloController implements Initializable {
 
         if (!hasHistory) {
             sb.append("No bookings found for this user.");
+        }
+
+        return sb.toString();
+    }
+
+    private String getEventProfileSummary(Event event) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Event ID: ").append(event.getEventId()).append("\n");
+        sb.append("Capacity: ").append(event.getCapacity()).append("\n");
+        sb.append("Location: ").append(event.getLocation()).append("\n");
+        sb.append("Time: ").append(event.getDateTime()).append("\n");
+
+        switch (event.getEventType()) {
+            case SEMINAR -> sb.append("Speaker: ").append(event.getSpecificAttribute()).append("\n");
+            case CONCERT -> sb.append("Age Restriction: ").append(event.getSpecificAttribute()).append("\n");
+            case WORKSHOP -> sb.append("Topic: ").append(event.getSpecificAttribute()).append("\n");
+        }
+
+        sb.append("Status: ").append(event.getStatus()).append("\n\n");
+        sb.append("CURRENT BOOKINGS:\n");
+
+        List<BookingWaitlistingManager.BookingEntry> bookings = event.getManager().getBookings();
+
+        for(BookingWaitlistingManager.BookingEntry booking : bookings) {
+
+            if(booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED)sb.append("- ").append(booking.getUser().getName()).append("\n");
         }
 
         return sb.toString();
