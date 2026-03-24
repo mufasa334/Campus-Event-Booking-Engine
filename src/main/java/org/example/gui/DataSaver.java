@@ -1,17 +1,32 @@
 package org.example.gui;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class DataSaver {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private static final Path DATA_DIR = Path.of("data");
+    private static final Path USERS_FILE = DATA_DIR.resolve("users.csv");
+    private static final Path EVENTS_FILE = DATA_DIR.resolve("events.csv");
+    private static final Path BOOKINGS_FILE = DATA_DIR.resolve("bookings.csv");
 
-    public static void saveUsers(String filePath, List<User> userList) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    static {
+        try {
+            Files.createDirectories(DATA_DIR);
+        } catch (IOException e) {
+            System.out.println("Error creating data directory: " + e.getMessage());
+        }
+    }
+
+    public static void saveUsers(List<User> userList) {
+        System.out.println("Saving users to: " + USERS_FILE.toAbsolutePath());
+
+        try (BufferedWriter bw = Files.newBufferedWriter(USERS_FILE)) {
             bw.write("userId,name,email,userType");
             bw.newLine();
 
@@ -26,15 +41,17 @@ public class DataSaver {
                 bw.newLine();
             }
 
-            System.out.println("SUCCESS: Users saved to " + filePath);
+            System.out.println("SUCCESS: Users saved.");
 
         } catch (IOException e) {
             System.out.println("Error saving users: " + e.getMessage());
         }
     }
 
-    public static void saveEvents(String filePath, List<Event> eventList) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    public static void saveEvents(List<Event> eventList) {
+        System.out.println("Saving events to: " + EVENTS_FILE.toAbsolutePath());
+
+        try (BufferedWriter bw = Files.newBufferedWriter(EVENTS_FILE)) {
             bw.write("eventId,title,dateTime,location,capacity,status,eventType,topic,speakerName,ageRestriction");
             bw.newLine();
 
@@ -75,24 +92,24 @@ public class DataSaver {
                 bw.newLine();
             }
 
-            System.out.println("SUCCESS: Events saved to " + filePath);
+            System.out.println("SUCCESS: Events saved.");
 
         } catch (IOException e) {
             System.out.println("Error saving events: " + e.getMessage());
         }
     }
 
-    public static void saveBookings(String filePath, List<User> userList, List<Event> eventList) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    public static void saveBookings(List<Event> eventList) {
+        System.out.println("Saving bookings to: " + BOOKINGS_FILE.toAbsolutePath());
+
+        try (BufferedWriter bw = Files.newBufferedWriter(BOOKINGS_FILE)) {
             bw.write("bookingId,userId,eventId,createdAt,bookingStatus");
             bw.newLine();
 
             for (Event event : eventList) {
                 BookingWaitlistingManager mgr = event.getManager();
 
-                // 🔥 NEW: use BookingEntry instead of User
                 for (BookingWaitlistingManager.BookingEntry booking : mgr.getBookings()) {
-
                     User user = booking.getUser();
 
                     bw.write(
@@ -100,25 +117,22 @@ public class DataSaver {
                                     user.getUserId() + "," +
                                     event.getEventId() + "," +
                                     booking.getCreatedAt().format(FORMATTER) + "," +
-                                    booking.getStatus()   // CONFIRMED / WAITLISTED / CANCELLED
+                                    booking.getStatus()
                     );
-
                     bw.newLine();
                 }
             }
 
-            System.out.println("SUCCESS: Bookings saved to " + filePath);
+            System.out.println("SUCCESS: Bookings saved.");
 
         } catch (IOException e) {
             System.out.println("Error saving bookings: " + e.getMessage());
         }
     }
 
-
-
     public static void saveAll(List<User> userList, List<Event> eventList) {
-        saveUsers("src/main/resources/data/users.csv", userList);
-        saveEvents("src/main/resources/data/events.csv", eventList);
-        saveBookings("src/main/resources/data/bookings.csv", userList, eventList);
+        saveUsers(userList);
+        saveEvents(eventList);
+        saveBookings(eventList);
     }
 }
