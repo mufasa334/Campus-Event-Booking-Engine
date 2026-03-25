@@ -2,29 +2,24 @@ package org.example.gui;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class DataLoader {
 
-    private static final Path DATA_DIR = Path.of("data");
-    private static final Path USERS_FILE = DATA_DIR.resolve("users.csv");
-    private static final Path EVENTS_FILE = DATA_DIR.resolve("events.csv");
-    private static final Path BOOKINGS_FILE = DATA_DIR.resolve("bookings.csv");
-
     public static void loadUsers(List<User> userList) {
-        System.out.println("Loading users from: " + USERS_FILE.toAbsolutePath());
+        InputStream input = DataLoader.class.getResourceAsStream("/data/users.csv");
 
-        if (!Files.exists(USERS_FILE)) {
-            System.out.println("Error loading users: " + USERS_FILE.toAbsolutePath() + " not found");
+        if (input == null) {
+            System.out.println("Error loading users: /data/users.csv not found");
             return;
         }
 
-        try (BufferedReader br = Files.newBufferedReader(USERS_FILE)) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine();
+            br.readLine(); // skip header
 
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
@@ -51,16 +46,16 @@ public class DataLoader {
     }
 
     public static void loadEvents(List<Event> eventList) {
-        System.out.println("Loading events from: " + EVENTS_FILE.toAbsolutePath());
+        InputStream input = DataLoader.class.getResourceAsStream("/data/events.csv");
 
-        if (!Files.exists(EVENTS_FILE)) {
-            System.out.println("Error loading events: " + EVENTS_FILE.toAbsolutePath() + " not found");
+        if (input == null) {
+            System.out.println("Error loading events: /data/events.csv not found");
             return;
         }
 
-        try (BufferedReader br = Files.newBufferedReader(EVENTS_FILE)) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
-            br.readLine();
+            br.readLine(); // skip header
 
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
@@ -96,14 +91,14 @@ public class DataLoader {
     }
 
     public static void loadBookings(List<User> userList, List<Event> eventList) {
-        System.out.println("Loading bookings from: " + BOOKINGS_FILE.toAbsolutePath());
+        InputStream input = DataLoader.class.getResourceAsStream("/data/bookings.csv");
 
-        if (!Files.exists(BOOKINGS_FILE)) {
-            System.out.println("Error loading bookings: " + BOOKINGS_FILE.toAbsolutePath() + " not found");
+        if (input == null) {
+            System.out.println("Error loading bookings: /data/bookings.csv not found");
             return;
         }
 
-        try (BufferedReader br = Files.newBufferedReader(BOOKINGS_FILE)) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
             br.readLine();
 
@@ -140,8 +135,14 @@ public class DataLoader {
                             BookingWaitlistingManager.BookingStatus.valueOf(statusText);
 
                     targetEvent.getManager().addLoadedBooking(targetUser, bookingId, createdAt, status);
+
+                    if (status != BookingWaitlistingManager.BookingStatus.CANCELLED) {
+                        targetUser.limitingNumberUP();
+                    }
                 }
             }
+
+
 
         } catch (IOException e) {
             System.out.println("Error loading bookings: " + e.getMessage());
