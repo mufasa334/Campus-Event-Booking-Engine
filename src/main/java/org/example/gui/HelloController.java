@@ -31,6 +31,8 @@ public class HelloController implements Initializable {
     @FXML private AnchorPane sidebarContainer;
     @FXML private AnchorPane contentArea;
 
+    @FXML private TextField eventSearchField;
+    @FXML private ComboBox<String> eventTypeFilter;
     @FXML private TextField eventIdField, eventTitleField, eventCapacityField, specificAttributeField, eventDateTimeField;
     @FXML private ComboBox<String> eventTypeDropdown;
 
@@ -454,6 +456,11 @@ public class HelloController implements Initializable {
             eventTypeDropdown.setItems(FXCollections.observableArrayList("Workshop", "Seminar", "Concert"));
         }
 
+        if (eventTypeFilter != null) {
+            eventTypeFilter.setItems(FXCollections.observableArrayList("Workshop", "Seminar", "Concert"));
+        }
+
+
         if (bookingUserSelection != null) {
             bookingUserSelection.setItems(
                     FXCollections.observableArrayList(
@@ -601,6 +608,37 @@ public class HelloController implements Initializable {
         }
     }
 
+    @FXML
+    private void handleSearchEvents() {
+        String searchText = eventSearchField.getText().toLowerCase().trim();
+        String typeFilter = eventTypeFilter.getValue();
+
+        ObservableList<Event> filtered = FXCollections.observableArrayList();
+
+        for (Event event : allEvents) {
+            boolean matchesTitle = searchText.isEmpty() || event.getTitle().toLowerCase().contains(searchText);
+            boolean matchesType = typeFilter == null || typeFilter.equals(event.getEventType().toString().charAt(0) + event.getEventType().toString().substring(1).toLowerCase());
+
+            if (matchesTitle && matchesType) {
+                filtered.add(event);
+            }
+        }
+
+        if (eventTable != null) {
+            eventTable.setItems(filtered);
+            eventTable.refresh();
+        }
+    }
+
+    @FXML
+    private void handleClearSearch() {
+        if (eventSearchField != null) eventSearchField.clear();
+        if (eventTypeFilter != null) eventTypeFilter.setValue(null);
+        if (eventTable != null) {
+            eventTable.setItems(allEvents);
+            eventTable.refresh();
+        }
+    }
     // =========================================================
     // VIEW SWITCHING
     // =========================================================

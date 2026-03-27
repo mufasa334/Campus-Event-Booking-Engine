@@ -35,6 +35,14 @@
                      <Button mnemonicParsing="false" onAction="#handleCancelEvent" prefHeight="25.0" prefWidth="120.0" text="Cancel Event" />
                  </children>
              </HBox>
+             <HBox prefHeight="40.0" prefWidth="200.0" spacing="10.0">
+                 <children>
+                     <TextField fx:id="eventSearchField" prefWidth="200.0" promptText="Search by title..." />
+                     <ComboBox fx:id="eventTypeFilter" prefWidth="130.0" promptText="Filter by Type" />
+                     <Button mnemonicParsing="false" onAction="#handleSearchEvents" prefHeight="25.0" prefWidth="80.0" text="Search" />
+                     <Button mnemonicParsing="false" onAction="#handleClearSearch" prefHeight="25.0" prefWidth="80.0" text="Clear" />
+                 </children>
+             </HBox>
              <TableView fx:id="eventTable" prefHeight="150.0" prefWidth="336.0" VBox.vgrow="ALWAYS">
                  <columns>
                      <TableColumn fx:id="colEventId" prefWidth="75.0" text="Event ID" />
