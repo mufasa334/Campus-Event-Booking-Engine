@@ -31,7 +31,7 @@ public class HelloController implements Initializable {
     @FXML private AnchorPane sidebarContainer;
     @FXML private AnchorPane contentArea;
 
-    @FXML private TextField eventIdField, eventTitleField, eventCapacityField, specificAttributeField;
+    @FXML private TextField eventIdField, eventTitleField, eventCapacityField, specificAttributeField, eventDateTimeField;
     @FXML private ComboBox<String> eventTypeDropdown;
 
     @FXML private ComboBox<String> bookingUserSelection;
@@ -45,7 +45,7 @@ public class HelloController implements Initializable {
     @FXML private TableColumn<User, String> colUserId, colName, colEmail, colType;
 
     @FXML private TableView<Event> eventTable;
-    @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus;
+    @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus, colEventDateTime;
     @FXML private TableColumn<Event, Integer> colEventCapacity;
 
     @FXML private TableView<BookingRecord> waitlistTable;
@@ -422,6 +422,7 @@ public class HelloController implements Initializable {
             colEventCapacity.setCellValueFactory(new PropertyValueFactory<>("capacity"));
             colEventType.setCellValueFactory(new PropertyValueFactory<>("eventType"));
             colEventStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+            colEventDateTime.setCellValueFactory(new PropertyValueFactory<>("dateTime"));
             eventTable.setItems(allEvents);
 
             eventTable.setOnMouseClicked(event -> {
@@ -566,11 +567,19 @@ public class HelloController implements Initializable {
         try {
             int cap = Integer.parseInt(eventCapacityField.getText());
 
+            java.time.LocalDateTime eventDateTime;
+            try {
+                eventDateTime = java.time.LocalDateTime.parse(eventDateTimeField.getText());
+            } catch (Exception ex) {
+                eventDateTime = java.time.LocalDateTime.now();
+                System.out.println("Warning: Invalid date format, defaulting to now.");
+            }
+
             Event newEvent = type.equals("Workshop")
-                    ? new Workshop(eId, eventTitleField.getText(), java.time.LocalDateTime.now(), "TBD", cap, specificAttributeField.getText())
+                    ? new Workshop(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText())
                     : type.equals("Seminar")
-                    ? new Seminar(eId, eventTitleField.getText(), java.time.LocalDateTime.now(), "TBD", cap, specificAttributeField.getText())
-                    : new Concert(eId, eventTitleField.getText(), java.time.LocalDateTime.now(), "TBD", cap, specificAttributeField.getText());
+                    ? new Seminar(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText())
+                    : new Concert(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText());
 
             allEvents.add(newEvent);
             refreshAllEventStatuses();
@@ -582,6 +591,7 @@ public class HelloController implements Initializable {
             eventTitleField.clear();
             eventCapacityField.clear();
             specificAttributeField.clear();
+            eventDateTimeField.clear();
 
         } catch (NumberFormatException e) {
             System.out.println("Error: Capacity must be a whole number (no letters or spaces).");
