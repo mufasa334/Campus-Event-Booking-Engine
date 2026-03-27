@@ -14,7 +14,9 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.scene.control.ButtonBar;
 
 import java.io.IOException;
 import java.net.URL;
@@ -429,18 +431,31 @@ public class HelloController implements Initializable {
 
             eventTable.setOnMouseClicked(event -> {
                 Event selectedEvent = eventTable.getSelectionModel().getSelectedItem();
-                if (selectedEvent != null && event.getClickCount() == 1) {
-                    Alert profile = new Alert(Alert.AlertType.INFORMATION);
-                    profile.setTitle("Event Profile Details");
-                    profile.setHeaderText("Event Summary: " + selectedEvent.getTitle());
-                    profile.setContentText(getEventProfileSummary(selectedEvent));
-                    profile.showAndWait();
+                if (selectedEvent == null) return;
+
+                if (event.getClickCount() == 2) {
+                    showEditEventDialog(selectedEvent);
                     eventTable.getSelectionModel().clearSelection();
+                } else if (event.getClickCount() == 1) {
+                    Event clickedEvent = selectedEvent;
+                    new java.util.Timer().schedule(new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            javafx.application.Platform.runLater(() -> {
+                                if (eventTable.getSelectionModel().getSelectedItem() == clickedEvent) {
+                                    Alert profile = new Alert(Alert.AlertType.INFORMATION);
+                                    profile.setTitle("Event Profile Details");
+                                    profile.setHeaderText("Event Summary: " + clickedEvent.getTitle());
+                                    profile.setContentText(getEventProfileSummary(clickedEvent));
+                                    profile.showAndWait();
+                                    eventTable.getSelectionModel().clearSelection();
+                                }
+                            });
+                        }
+                    }, 300);
                 }
-            });
+            });;
         }
-
-
     }
 
     // =========================================================
@@ -606,6 +621,60 @@ public class HelloController implements Initializable {
             System.out.println("Unexpected Error adding event: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void showEditEventDialog(Event selectedEvent) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Update Event");
+        dialog.setHeaderText("Editing: " + selectedEvent.getTitle());
+
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        TextField titleField = new TextField(selectedEvent.getTitle());
+        TextField locationField = new TextField(selectedEvent.getLocation());
+        TextField capacityField = new TextField(String.valueOf(selectedEvent.getCapacity()));
+        TextField dateTimeField = new TextField(selectedEvent.getDateTime().toString());
+        TextField specificField = new TextField(selectedEvent.getSpecificAttribute());
+
+        VBox content = new VBox(10);
+        content.getChildren().addAll(
+                new Label("Title:"), titleField,
+                new Label("Location:"), locationField,
+                new Label("Capacity:"), capacityField,
+                new Label("Date/Time (yyyy-MM-ddTHH:mm):"), dateTimeField,
+                new Label("Topic/Speaker/Age:"), specificField
+        );
+        dialog.getDialogPane().setContent(content);
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result == saveButtonType) {
+                try {
+                    selectedEvent.setTitle(titleField.getText());
+                    selectedEvent.setLocation(locationField.getText());
+                    selectedEvent.setCapacity(Integer.parseInt(capacityField.getText()));
+                    selectedEvent.setDateTime(java.time.LocalDateTime.parse(dateTimeField.getText()));
+
+                    if (selectedEvent instanceof Workshop) {
+                        ((Workshop) selectedEvent).setTopic(specificField.getText());
+                    } else if (selectedEvent instanceof Seminar) {
+                        ((Seminar) selectedEvent).setSpeakerName(specificField.getText());
+                    } else if (selectedEvent instanceof Concert) {
+                        ((Concert) selectedEvent).setAgeRestriction(specificField.getText());
+                    }
+
+                    setupEventTable();
+                    eventTable.refresh();
+                    System.out.println("SUCCESS: Event updated -> " + selectedEvent.getTitle());
+
+                } catch (Exception e) {
+                    Alert error = new Alert(Alert.AlertType.ERROR);
+                    error.setTitle("Update Failed");
+                    error.setContentText("Invalid input: " + e.getMessage());
+                    error.showAndWait();
+                }
+            }
+        });
     }
 
     @FXML
