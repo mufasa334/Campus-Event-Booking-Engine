@@ -1,21 +1,24 @@
 package campusbooking;
 
 public class User {
+    protected String userId;
+    protected String name;
+    protected String email;
+    protected String role;
 
-    private String userId;
-    private String name;
-
-
-    public User(String userId, String name, String email) {
+    public User(String userId, String name, String email, String role) {
         this.userId = userId;
         this.name = name;
+        this.email = email;
+        this.role = role;
     }
 
-    public String getUserId() {
-        return userId;
-    }
+    public String getUserId() { return userId; }
+    public String getName() { return name; }
+    public String getRole() { return role; }
 
-    public String getName() {
-        return name;
+    @Override
+    public String toString() {
+        return userId + " | " + name + " | " + role;
     }
 }
