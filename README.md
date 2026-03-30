@@ -34,6 +34,7 @@ This application features a modular UI designed around secure administrative ope
 
 ### 2. Event Operations & Discovery
 * **Deploy an Event:** Enter the requisite details (Event ID, Title, Date/Time, Location, Capacity) and select the specific Event Type to reveal type-specific attributes (e.g., Topic for Workshops, Speaker for Seminars).
+* **Update Event:** Double click on the event you want to update, and edit the information you want to change.
 * **Deactivate an Event:** Select an event and press "Cancel Event". 
     * *System Behavior:* To maintain database integrity, the system does not hard-delete the event. It updates the status to **Cancelled**, securely cancels all associated bookings, and purges the waitlist, leaving a complete audit trail.
 * **Data Retrieval:** Use the dynamic search bar to find events by Title, or utilize the dropdown to filter by Event Type. Click **Clear** to instantly reset the search state and fetch the full database list.
