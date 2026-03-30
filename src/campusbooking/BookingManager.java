@@ -1,41 +1,65 @@
 package campusbooking;
 
-
-
 import java.util.*;
 
 public class BookingManager {
 
-    private Map<String, Booking> bookings = new HashMap<>();
+    private HashMap<String, Booking> bookings = new HashMap<>();
 
-    private UserManager userManager;
-    private EventManager eventManager;
-
-    public BookingManager(UserManager u, EventManager e) {
-        userManager = u;
-        eventManager = e;
+    public boolean hasBookings() {
+        return !bookings.isEmpty();
     }
 
-    public Booking createBooking(String userId, String eventId) {
+    public boolean createBooking(String bookingId, User user, Event event) {
 
-        User user = userManager.getUser(userId);
-        Event event = eventManager.getEvent(eventId);
+        if (bookings.containsKey(bookingId)) {
+            System.out.println("Booking ID already exists.");
+            return false;
+        }
 
-        Booking b = new Booking(userId, eventId);
-        bookings.put(b.getBookingId(), b);
+        // prevent duplicate booking
+        for (Booking b : bookings.values()) {
+            if (b.getUser().getUserId().equals(user.getUserId()) &&
+                    b.getEvent().getEventId().equals(event.getEventId())) {
+                System.out.println("User already booked this event.");
+                return false;
+            }
+        }
 
-        return b;
+        // capacity check
+        if (!event.addUser(user.getUserId())) {
+            System.out.println("Event is full.");
+            return false;
+        }
+
+        bookings.put(bookingId, new Booking(bookingId, user, event));
+        return true;
     }
 
-    public void cancelBooking(String bookingId) {
+    public boolean cancelBooking(String bookingId) {
 
         Booking b = bookings.get(bookingId);
+        if (b == null) return false;
 
-        if (b != null)
-            b.setStatus("CANCELLED");
+        b.getEvent().removeUser(b.getUser().getUserId());
+        bookings.remove(bookingId);
+
+        return true;
     }
 
-    public Collection<Booking> listBookings() {
+    public Collection<Booking> getAllBookings() {
         return bookings.values();
+    }
+
+    public List<Booking> getBookingsForUser(String userId) {
+        List<Booking> result = new ArrayList<>();
+
+        for (Booking b : bookings.values()) {
+            if (b.getUser().getUserId().equals(userId)) {
+                result.add(b);
+            }
+        }
+
+        return result;
     }
 }
