@@ -201,7 +201,11 @@ public class HelloController implements Initializable {
 
         // Only block if the user is trying to take a confirmed spot immediately
         if (eventHasSpace && confirmedCount >= selectedUser.getMaxConfirmedBookings()) {
-            System.out.println("Maximum Confirmed Bookings Reached");
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Booking Blocked");
+            alert.setHeaderText("Booking Limit Reached");
+            alert.setContentText("This " + selectedUser.getUserType() + " cannot exceed their limit of " + selectedUser.getMaxConfirmedBookings() + " active confirmed bookings.");
+            alert.showAndWait();
             return;
         }
 
