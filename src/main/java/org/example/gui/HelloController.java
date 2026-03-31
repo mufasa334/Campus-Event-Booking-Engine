@@ -24,65 +24,91 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+//DECLARING UI ELEMENTS
 public class HelloController implements Initializable {
 
-    @FXML private TextArea notificationArea;
-    @FXML private TableView<BookingRecord> bookingTable;
-    @FXML private TableColumn<BookingRecord, String> colBookId, colBookUser, colBookEvent, colBookTime, colBookStatus;
+    //SIDE BAR AND MAIN PANEL//--------------------------------------------------------
 
     @FXML private AnchorPane sidebarContainer;
     @FXML private AnchorPane contentArea;
 
+    //USER TAB//----------------------------------------------------------------------------
+
+    //TABLE
+    @FXML private TableView<User> userTable;
+    @FXML private TableColumn<User, String> colUserId, colName, colEmail, colType;
+    //INTERACTABLES
+    @FXML private TextField idField, nameField, emailField;
+    @FXML private ComboBox<String> roleComboBox;
+
+    //EVENT TAB//-----------------------------------------------------------------------------
+
+    //TABLE
+    @FXML private TableView<Event> eventTable;
+    @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus, colEventDateTime;
+    @FXML private TableColumn<Event, Integer> colEventCapacity;
+    //INTERACTABLES
     @FXML private TextField eventSearchField;
     @FXML private ComboBox<String> eventTypeFilter;
     @FXML private TextField eventIdField, eventTitleField, eventLocationField, eventCapacityField, specificAttributeField, eventDateTimeField;
     @FXML private ComboBox<String> eventTypeDropdown;
 
+    //BOOKING TAB//----------------------------------------------------------------------
+
+    //TABLE
+    @FXML private TextArea notificationArea;
+    @FXML private TableView<BookingRecord> bookingTable;
+    @FXML private TableColumn<BookingRecord, String> colBookId, colBookUser, colBookEvent, colBookTime, colBookStatus;
+    //INTERACTABLES
     @FXML private ComboBox<String> bookingUserSelection;
     @FXML private ComboBox<String> bookingEventSelection;
     @FXML private ComboBox<String> waitlistEventSelection;
 
-    @FXML private TextField idField, nameField, emailField;
-    @FXML private ComboBox<String> roleComboBox;
+    //WAITLISTING TAB//-------------------------------------------------------------------------
 
-    @FXML private TableView<User> userTable;
-    @FXML private TableColumn<User, String> colUserId, colName, colEmail, colType;
-
-    @FXML private TableView<Event> eventTable;
-    @FXML private TableColumn<Event, String> colEventId, colEventTitle, colEventType, colEventStatus, colEventDateTime;
-    @FXML private TableColumn<Event, Integer> colEventCapacity;
-
+    //TABLE
     @FXML private TableView<BookingRecord> waitlistTable;
     @FXML private TableColumn<BookingRecord, String> colWaitUser;
     @FXML private TableColumn<BookingRecord, String> colWaitStatus;
 
+    //OBJECT ARRAYS//-----------------------------------------------------------------------------
+
     private static final ObservableList<BookingRecord> displayBookings = FXCollections.observableArrayList();
     private static final ObservableList<Event> allEvents = FXCollections.observableArrayList();
     private static final ObservableList<User> allUsers = FXCollections.observableArrayList();
+    //OTHER
     private static boolean isSidebarVisible = true;
 
+    //---------------------------------------------------------------------------------------------
+
+    //INSTANTIATES ALL ARRAYS  AND SETS UP TABLES
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         boolean isFirstLoad = allEvents.isEmpty();
 
+        //LOADS USER ARRAY FROM DATALOADER
         if (allUsers.isEmpty()) {
             DataLoader.loadUsers(allUsers);
         }
 
+        //LOADS EVENT ARRAY FROM DATALOADER
         if (allEvents.isEmpty()) {
             DataLoader.loadEvents(allEvents);
         }
 
+        //CREATES STORED BOOKING CONNECTIONS BETWEEN USER AND EVENT OBJECTS
         if (isFirstLoad) {
             DataLoader.loadBookings(allUsers, allEvents);
         }
 
+        //TABLE SETUP
         refreshAllEventStatuses();
         setupUserTable();
         setupEventTable();
         refreshALLBookingsTable();
         fillAllDropdowns();
 
+        //FILLS BOOKING TABLE WITH DATA
         if (bookingTable != null) {
             bookingTable.setItems(displayBookings);
         }
@@ -92,9 +118,15 @@ public class HelloController implements Initializable {
     // BOOKING LIMIT + STATUS LOGIC
     // =========================================================
 
+    //FINDS THE AMOUNT OF CONFIRMED BOOKINGS THIS USER CURRENTLY HAS
+    //PRECONDITION:
+    //              USER TYPE OBJECT - USER TO CHECK
+    //POSTCONDITION:
+    //              INTEGER - NUMBER OF CURRENT BOOKINGS
     private int getConfirmedBookingCount(User user) {
         int count = 0;
 
+        //GO THROUGH ALL EVENTS AND IF THEY CONTAIN THE USER ADD TO COUNT
         for (Event event : allEvents) {
             BookingWaitlistingManager.BookingEntry booking =
                     event.getManager().findBookingByUser(user);
@@ -108,9 +140,16 @@ public class HelloController implements Initializable {
         return count;
     }
 
+    //FINDS THE AMOUNT OF CONFIRMED BOOKINGS THIS USER CURRENTLY HAS EXCLUDING ONE EVENT
+    //PRECONDITION:
+    //              USER TYPE OBJECT - USER TO CHECK
+    //              EVENT TYPE OBJECT - EVENT TO IGNORE IN COUNTING
+    //POSTCONDITION:
+    //              INTEGER - NUMBER OF CURRENT BOOKINGS EXCLUDING THE EVENT
     private int getConfirmedBookingCountExcludingEvent(User user, Event excludedEvent) {
         int count = 0;
 
+        //GO THROUGH ALL EVENTS EXCEPT ONE AND IF THEY CONTAIN THE USER ADD TO COUNT
         for (Event event : allEvents) {
             if (event == excludedEvent) continue;
 
@@ -126,33 +165,48 @@ public class HelloController implements Initializable {
         return count;
     }
 
+    //CHECKS IF THE EVENT HAS SPACE LEFT
+    //PRECONDITION:
+    //              EVENT TYPE OBJECT - EVENT TO CHECK
+    //POSTCONDITION:
+    //              BOOLEAN - RETURNS TRUE IF THERE IS EVENT SPACE
     private boolean eventHasConfirmedSpace(Event event) {
         int confirmedCount = 0;
 
+        //COUNTS NUMBER OF CURRENT BOOKINGS
         for (BookingWaitlistingManager.BookingEntry booking : event.getManager().getBookings()) {
             if (booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED) {
                 confirmedCount++;
             }
         }
 
+        //CHECKS IF AMOUNT CURRENTLY BOOKED IS UNDER TOTAL CAPACITY
         return confirmedCount < event.getManager().getCapacity();
     }
 
+    //REFRESHES EVENT STATUS FOR ALL EVENTS
     private void refreshAllEventStatuses() {
         for (Event event : allEvents) {
             refreshSingleEventStatuses(event);
         }
     }
 
+    //WAITLISTING UPDATE FOR A SPECIFIC EVENT
+    //PRECONDITION:
+    //              EVENT TYPE OBJECT - EVENT TO UPDATE BOOKING + WAITLIST
     private void refreshSingleEventStatuses(Event event) {
+
+        //GET BOOKING MANAGER FROM EVENT
         BookingWaitlistingManager manager = event.getManager();
 
+        //GO THROUGH MANAGER AND TURN ALL NON-CANCELLED BOOKINGS TO WAITLISTED
         for (BookingWaitlistingManager.BookingEntry booking : manager.getBookings()) {
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.WAITLISTED);
             }
         }
 
+        //SORTS ALL NON-CANCELLED BOOKINGS IN ORDER OF CREATION TIME
         java.util.List<BookingWaitlistingManager.BookingEntry> activeBookings =
                 manager.getBookings().stream()
                         .filter(b -> b.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED)
@@ -161,14 +215,20 @@ public class HelloController implements Initializable {
 
         int confirmedCountForEvent = 0;
 
+        //LOOPS THROUGH ALL BOOKINGS
         for (BookingWaitlistingManager.BookingEntry booking : activeBookings) {
+
+            //CHECKS HOW MANY OTHER BOOKINGS THIS USER CURRENTLY HAS
             User user = booking.getUser();
             int userConfirmedElsewhere = getConfirmedBookingCountExcludingEvent(user, event);
 
+            //IF EVENT IS NOT FULL AND PERSON HAS BOOKING CAPACITY, CONFIRM THEIR BOOKING
             if (confirmedCountForEvent < manager.getCapacity()
                     && userConfirmedElsewhere < user.getMaxConfirmedBookings()) {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.CONFIRMED);
                 confirmedCountForEvent++;
+
+            //ELSE KEEP THEM ON WAITLISTED
             } else {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.WAITLISTED);
             }
@@ -179,8 +239,11 @@ public class HelloController implements Initializable {
     // BOOKING ACTIONS
     // =========================================================
 
+    //CREATES A BOOKING THROUGH THE UI (** "BOOK EVENT" BUTTON **)
     @FXML
     private void handleCreateBooking() {
+
+        //FINDS USER AND EVENT SELECTED IN THE DROP-DOWN MENUS
         String uId = bookingUserSelection.getValue();
         String eId = bookingEventSelection.getValue();
 
@@ -191,15 +254,20 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
+        //IF THE EVENT IS CANCELLED, IT IS UNBOOKABLE
+        if(selectedEvent.getStatus() == Event.EventStatus.CANCELLED) return;
+
+        //CHECKS WHETHER USER IS ALREADY BOOKED
         if (selectedEvent.getManager().containsUser(selectedUser)) {
             System.out.println("User is already booked or waitlisted for this event.");
             return;
         }
 
+        //CHECKS WHETHER EVENT AND USER HAVE ENOUGH SPACE TO BOOK
         int confirmedCount = getConfirmedBookingCount(selectedUser);
         boolean eventHasSpace = eventHasConfirmedSpace(selectedEvent);
 
-        // Only block if the user is trying to take a confirmed spot immediately
+        //ONLY BLOCKS IF THERE IS STILL EVENT SPACE BUT USER IS FULL + INFORMATIVE POP-UP
         if (eventHasSpace && confirmedCount >= selectedUser.getMaxConfirmedBookings()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Booking Blocked");
@@ -209,9 +277,11 @@ public class HelloController implements Initializable {
             return;
         }
 
+        //ADDS USER TO BOOKING AND REFRESHES WAITLIST
         selectedEvent.getManager().addUser(selectedUser);
         refreshAllEventStatuses();
 
+        //DEBUG CODE TO TEST IF BOOKING WORKED
         BookingWaitlistingManager.BookingEntry booking =
                 selectedEvent.getManager().findBookingByUser(selectedUser);
 
@@ -221,11 +291,15 @@ public class HelloController implements Initializable {
             System.out.println("DEBUG: Status = " + booking.getStatus());
         }
 
+        //REFRESH THE TABLE CONTAINING BOOKINGS
         refreshALLBookingsTable();
     }
 
+    //*** UNUSED DELETE METHOD ***
     @FXML
     private void handleDeleteBooking() {
+
+        //FINDS USER AND EVENT SELECTED IN THE DROP-DOWN MENUS
         String userId = bookingUserSelection.getValue();
         String eventId = bookingEventSelection.getValue();
 
@@ -236,6 +310,7 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
+        //IF THERE IS NO BOOKING, INFORM USER WITH A POP-UP
         BookingWaitlistingManager.BookingEntry booking =
                 selectedEvent.getManager().findBookingByUser(selectedUser);
 
@@ -248,6 +323,7 @@ public class HelloController implements Initializable {
             return;
         }
 
+        //IF BOOKING IS DELETED, INFORM THE USER WITH A POP-UP
         boolean deleted = selectedEvent.getManager().deleteBooking(selectedUser);
 
         if (deleted) {
@@ -262,8 +338,11 @@ public class HelloController implements Initializable {
         }
     }
 
+    //CANCELS BOOKING THROUGH THE UI (** "CANCEL BOOKING" BUTTON **)
     @FXML
     private void handleCancelBooking() {
+
+        //FINDS USER AND EVENT SELECTED IN THE DROP-DOWN MENUS
         String userId = bookingUserSelection.getValue();
         String eventId = bookingEventSelection.getValue();
 
@@ -274,6 +353,7 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
+        //IF BOOKING IS CANCELLED, INFORM USER WITH A POP-UP
         boolean cancelled = selectedEvent.getManager().cancelBooking(selectedUser);
 
         if (cancelled) {
@@ -286,6 +366,7 @@ public class HelloController implements Initializable {
             refreshAllEventStatuses();
             refreshALLBookingsTable();
         } else {
+            //IF THERE IS NO BOOKING, INFORM USER WITH A POP-UP
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Cancel Failed");
             alert.setHeaderText(null);
@@ -294,8 +375,11 @@ public class HelloController implements Initializable {
         }
     }
 
+    //CANCELS AN EVENT - CANCELS ALL BOOKED USERS AND MAKES EVENT UNBOOKABLE (** "CANCEL EVENT" BUTTON **)
     @FXML
     private void handleCancelEvent() {
+
+        //FINDS EVENT SELECTED IN THE DROP-DOWN MENU
         String eventId = waitlistEventSelection.getValue();
 
         if (eventId == null) return;
@@ -303,17 +387,21 @@ public class HelloController implements Initializable {
         Event selectedEvent = findEventById(eventId);
         if (selectedEvent == null) return;
 
+        //CANCELS EVENT
         selectedEvent.setStatus(Event.EventStatus.CANCELLED);
 
+        //GOES THROUGH ALL BOOKINGS AND CANCELS THEM
         for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.CANCELLED);
             }
         }
 
+        //DEBUG CODE
         System.out.println("Logic Hook: EVENT CANCELLED -> " + selectedEvent.getTitle());
         System.out.println("All bookings for this event are now marked as CANCELLED.");
 
+        //REFRESHES WAITLIST AND BOOKING TABLE
         refreshAllEventStatuses();
         refreshALLBookingsTable();
 
@@ -322,6 +410,7 @@ public class HelloController implements Initializable {
         }
     }
 
+    //REFRESHES BOOKING TABLE AFTER USE
     @FXML
     private void handleDropdownChange() {
         if (bookingEventSelection != null && bookingEventSelection.getValue() != null) {
@@ -329,8 +418,11 @@ public class HelloController implements Initializable {
         }
     }
 
+    //SHOWS ALL WAITLISTED USERS FOR SELECTED EVENT (** "VIEW WAITLIST" BUTTON **)
     @FXML
     private void handleViewWaitlist() {
+
+        //FINDS EVENT SELECTED IN THE DROP-DOWN MENU
         String eId = waitlistEventSelection.getValue();
 
         if (eId == null) {
@@ -343,8 +435,10 @@ public class HelloController implements Initializable {
         Event selectedEvent = findEventById(eId);
         if (selectedEvent == null) return;
 
+        //CODE FOR FIRST WAITLIST MENU
         refreshWaitlistTable(selectedEvent);
 
+        //CODE FOR SECOND WAITLIST MENU (STRINGBUILDER)
         StringBuilder rosterInfo = new StringBuilder();
         rosterInfo.append("--- WAITLIST FOR: ")
                 .append(selectedEvent.getTitle())
@@ -370,10 +464,12 @@ public class HelloController implements Initializable {
             hasWaitlisted = true;
         }
 
+        //PRINTS THIS IF THERE ARE NO WAITLISTED USERS
         if (!hasWaitlisted) {
             rosterInfo.append("(No users are currently waitlisted for this event)");
         }
 
+        //PRINTS STRINGBUILDER TO SCREEN
         if (notificationArea != null) {
             notificationArea.setText(rosterInfo.toString());
         }
@@ -383,6 +479,11 @@ public class HelloController implements Initializable {
     // FINDERS
     // =========================================================
 
+    //RETURNS USER FROM USER ARRAY GIVEN THEIR ID
+    //PRECONDITION:
+    //              STRING - ID OF USER TO FIND
+    //POSTCONDITION:
+    //              USER TYPE OBJECT - USER WITH THE GIVEN ID
     public User findUserById(String id) {
         return allUsers.stream()
                 .filter(u -> u.getUserId().equals(id))
@@ -390,6 +491,11 @@ public class HelloController implements Initializable {
                 .orElse(null);
     }
 
+    //RETURNS EVENT FROM EVENT ARRAY GIVEN ITS ID
+    //PRECONDITION:
+    //              STRING - ID OF EVENT TO FIND
+    //POSTCONDITION:
+    //              EVENT TYPE OBJECT - EVENT WITH THE GIVEN ID
     public Event findEventById(String id) {
         return allEvents.stream()
                 .filter(e -> e.getEventId().equals(id))
@@ -401,7 +507,10 @@ public class HelloController implements Initializable {
     // TABLE SETUP
     // =========================================================
 
+    //SETUP FOR THE TABLE ON THE USER TAB
     private void setupUserTable() {
+
+        //SETUP AND POPULATING OF THE TABLE
         if (userTable != null && colUserId != null) {
             colUserId.setCellValueFactory(new PropertyValueFactory<>("userId"));
             colName.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -409,6 +518,7 @@ public class HelloController implements Initializable {
             colType.setCellValueFactory(new PropertyValueFactory<>("userType"));
             userTable.setItems(allUsers);
 
+            //POP-UP INFORMATION ABOUT THE USER ON CLICK
             userTable.setOnMouseClicked(event -> {
                 User selectedUser = userTable.getSelectionModel().getSelectedItem();
                 if (selectedUser != null && event.getClickCount() == 1) {
@@ -423,7 +533,10 @@ public class HelloController implements Initializable {
         }
     }
 
+    //SETUP FOR THE TABLE ON THE EVENT TAB
     private void setupEventTable() {
+
+        //SETUP AND POPULATING OF THE TABLE
         if (eventTable != null && colEventId != null) {
             colEventId.setCellValueFactory(new PropertyValueFactory<>("eventId"));
             colEventTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -433,6 +546,7 @@ public class HelloController implements Initializable {
             colEventDateTime.setCellValueFactory(new PropertyValueFactory<>("dateTime"));
             eventTable.setItems(allEvents);
 
+            //POP-UP INFORMATION ABOUT THE EVENT ON CLICK + OPTION TO EDIT ON DOUBLE CLICK
             eventTable.setOnMouseClicked(event -> {
                 Event selectedEvent = eventTable.getSelectionModel().getSelectedItem();
                 if (selectedEvent == null) return;
@@ -466,20 +580,25 @@ public class HelloController implements Initializable {
     // DROPDOWNS
     // =========================================================
 
+    //FILLS ALL DROP-DOWNS WITH THEIR RESPECTIVE OPTIONS
     private void fillAllDropdowns() {
+
+        //SETUP FOR USER TYPE DROPDOWN
         if (roleComboBox != null) {
             roleComboBox.setItems(FXCollections.observableArrayList("Student", "Staff", "Guest"));
         }
 
+        //SETUP FOR EVENT TYPE DROPDOWN
         if (eventTypeDropdown != null) {
             eventTypeDropdown.setItems(FXCollections.observableArrayList("Workshop", "Seminar", "Concert"));
         }
 
+        //SETUP FOR EVENT TYPE FILTER DROPDOWN
         if (eventTypeFilter != null) {
             eventTypeFilter.setItems(FXCollections.observableArrayList("Workshop", "Seminar", "Concert"));
         }
 
-
+        //SETUP FOR BOOKING TAB USERS DROPDOWN
         if (bookingUserSelection != null) {
             bookingUserSelection.setItems(
                     FXCollections.observableArrayList(
@@ -488,6 +607,7 @@ public class HelloController implements Initializable {
             );
         }
 
+        //SETUP FOR BOOKING TAB AND WAITLISTING TAB EVENTS DROPDOWN
         ObservableList<String> eventIds = FXCollections.observableArrayList(
                 allEvents.stream().map(Event::getEventId).collect(Collectors.toList())
         );
@@ -500,8 +620,11 @@ public class HelloController implements Initializable {
     // USER + EVENT CREATION
     // =========================================================
 
+    //CREATES A USER AND ADDS THEM TO THE ARRAY (** "ADD-USER" BUTTON **)
     @FXML
     private void AddUser() {
+
+        //OBTAIN DATA FROM TEXT BOXES + NECESSARY CHECKS
         String id = idField.getText();
         String name = nameField.getText();
         String type = roleComboBox.getValue();
@@ -539,23 +662,29 @@ public class HelloController implements Initializable {
             return;
         }
 
+        //CREATES A USER OBJECT OF GIVEN TYPE FROM DATA
         User newUser = type.equals("Student")
                 ? new Student(id, name, emailField.getText())
                 : type.equals("Staff")
                 ? new Staff(id, name, emailField.getText())
                 : new Guest(id, name, emailField.getText());
 
+        //ADDS NEW USER TO USER ARRAY
         allUsers.add(newUser);
         System.out.println("Success: User added to list. Total users: " + allUsers.size());
 
+        //REFRESHES TABLE AND TEXT BOXES
         fillAllDropdowns();
         idField.clear();
         nameField.clear();
         emailField.clear();
     }
 
+    //CREATES AN EVENT AND ADDS IT TO THE ARRAY (** "ADD EVENT" BUTTON **)
     @FXML
     private void AddEvent() {
+
+        //OBTAIN DATA FROM TEXT BOXES + NECESSARY CHECKS
         String eId = eventIdField.getText();
         String type = eventTypeDropdown.getValue();
 
@@ -590,9 +719,13 @@ public class HelloController implements Initializable {
             return;
         }
 
+        //TRY TO CREATE AN EVENT OBJECT IN CASE SOMETHING HAS THE WRONG PARAMETER
         try {
+
+            //FIRST CATCH FOR WHETHER CAPACITY IS A NUMBER
             int cap = Integer.parseInt(eventCapacityField.getText());
 
+            //TRY-CATCH FOR IF LOCALDATETIME IS IN THE CORRECT FORMAT
             java.time.LocalDateTime eventDateTime;
             try {
                 eventDateTime = java.time.LocalDateTime.parse(eventDateTimeField.getText());
@@ -601,17 +734,20 @@ public class HelloController implements Initializable {
                 System.out.println("Warning: Invalid date format, defaulting to now.");
             }
 
+            //CREATES EVENT OF GIVEN TYPE FROM DATA
             Event newEvent = type.equals("Workshop")
                     ? new Workshop(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText())
                     : type.equals("Seminar")
                     ? new Seminar(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText())
                     : new Concert(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText());
 
+            //ADDS EVENT TO EVENT ARRAY
             allEvents.add(newEvent);
             refreshAllEventStatuses();
 
             System.out.println("SUCCESS: " + newEvent.getTitle() + " added to the system.");
 
+            //REFRESHES TABLE AND TEXT BOXES
             fillAllDropdowns();
             eventIdField.clear();
             eventTitleField.clear();
@@ -623,12 +759,18 @@ public class HelloController implements Initializable {
         } catch (NumberFormatException e) {
             System.out.println("Error: Capacity must be a whole number (no letters or spaces).");
         } catch (Exception e) {
+            //EXTRA CATCH IN CASE ANYTHING UNEXPECTED HAPPENS
             System.out.println("Unexpected Error adding event: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    //METHOD FOR UPDATING EVENTS (DOUBLE-CLICK ON EVENT TAB TABLE)
+    //PRECONDITION:
+    //              EVENT TYPE OBJECT - EVENT TO UPDATE
     private void showEditEventDialog(Event selectedEvent) {
+
+        //SETUP FOR THE UPDATE EVENT POP-UP
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Update Event");
         dialog.setHeaderText("Editing: " + selectedEvent.getTitle());
@@ -652,6 +794,7 @@ public class HelloController implements Initializable {
         );
         dialog.getDialogPane().setContent(content);
 
+        //IF THE SAVE BUTTON IS PRESSED, ALL THINGS IN THE TEXT BOXES BECOME THE NEW DATA
         dialog.showAndWait().ifPresent(result -> {
             if (result == saveButtonType) {
                 try {
@@ -682,30 +825,40 @@ public class HelloController implements Initializable {
         });
     }
 
+    //FILTERS EVENTS (** "SEARCH" BUTTON **)
     @FXML
     private void handleSearchEvents() {
+
+        //OBTAIN DATA FROM TEXT BOXES
         String searchText = eventSearchField.getText().toLowerCase().trim();
         String typeFilter = eventTypeFilter.getValue();
 
+        //CREATE NEW EVENT LIST
         ObservableList<Event> filtered = FXCollections.observableArrayList();
 
+        //SEARCH THROUGH ALL EVENTS FOR ONES THAT MATCH THE CONDITIONS
         for (Event event : allEvents) {
             boolean matchesTitle = searchText.isEmpty() || event.getTitle().toLowerCase().contains(searchText);
             boolean matchesType = typeFilter == null || typeFilter.equals(event.getEventType().toString().charAt(0) + event.getEventType().toString().substring(1).toLowerCase());
 
             if (matchesTitle && matchesType) {
+                //ADD TO NEW LIST IF MATCHING
                 filtered.add(event);
             }
         }
 
+        //PUTS THE FILTERED LIST ON THE TABLE
         if (eventTable != null) {
             eventTable.setItems(filtered);
             eventTable.refresh();
         }
     }
 
+    //REFRESHES EVENT TABLE BACK TO NORMAL (** "CLEAR" BUTTON **)
     @FXML
     private void handleClearSearch() {
+
+        //CLEARS TEXT BOX, DROP-DOWN, AND REFRESHES TABLE
         if (eventSearchField != null) eventSearchField.clear();
         if (eventTypeFilter != null) eventTypeFilter.setValue(null);
         if (eventTable != null) {
@@ -717,15 +870,20 @@ public class HelloController implements Initializable {
     // VIEW SWITCHING
     // =========================================================
 
+    //RUNS THE BELOW METHOD ON SELECTED FILE WHEN THE TAB IS PRESSED (** SIDE BUTTONS **)
     @FXML public void showUserManagement() { switchView("user-management.fxml"); }
     @FXML public void showEventsManagement() { switchView("events-management.fxml"); }
     @FXML public void showBookingsManagement() { switchView("bookings-management.fxml"); }
     @FXML public void showWaitlistsManagement() { switchView("waitlists-management.fxml"); }
 
+    //SWITCHES MENU TO THE ONE ON THE FILE GIVEN
+    //PRECONDITION:
+    //              STRING - FXML FILE TO SWITCH TO
     private void switchView(String fxmlFile) {
         try {
             if (contentArea == null) return;
 
+            //LOADS FILE
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             loader.setController(this);
             Node view = loader.load();
@@ -753,10 +911,12 @@ public class HelloController implements Initializable {
     // APP CONTROLS
     // =========================================================
 
+    //HIDES OR REVEALS SIDE BAR (** "MENU" BUTTON **)
     @FXML
     public void toggleSidebar() {
         if (sidebarContainer == null) return;
 
+        //ADJUSTS MENU SIZE AND MAKES SIDE BAR VISIBLE / INVISIBLE
         Timeline timeline = new Timeline();
         double targetWidth = isSidebarVisible ? 0 : 200;
         KeyValue widthValue = new KeyValue(sidebarContainer.prefWidthProperty(), targetWidth, Interpolator.EASE_BOTH);
@@ -772,16 +932,21 @@ public class HelloController implements Initializable {
         isSidebarVisible = !isSidebarVisible;
     }
 
+    //CLOSES APPLICATION (** "X" BUTTON **)
     @FXML
     public void closeApplication() {
         Platform.exit();
         System.exit(0);
     }
 
+    //SAVES ALL CHANGES (** "SAVE DATA" BUTTON **)
     @FXML
     private void handleSaveData() {
+
+        //SAVE ALL CHANGES INTO THE CORRECT FILE
         DataSaver.saveAll(allUsers, allEvents);
 
+        //POP-UP TO CONFIRM THE SAVE
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Save Successful");
         alert.setHeaderText(null);
@@ -795,17 +960,21 @@ public class HelloController implements Initializable {
     // BOOKING / WAITLIST TABLES
     // =========================================================
 
+    //REFRESHES BOOKING TABLE
     private void refreshALLBookingsTable() {
         if (bookingTable == null || colBookId == null) return;
 
+        //MAKES NEW COLUMNS WITH SET TITLES
         colBookId.setCellValueFactory(new PropertyValueFactory<>("bookingId"));
         colBookUser.setCellValueFactory(new PropertyValueFactory<>("userName"));
         colBookEvent.setCellValueFactory(new PropertyValueFactory<>("eventId"));
         colBookTime.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
         colBookStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        //CLEARS DATA
         displayBookings.clear();
 
+        //GET ALL BOOKED USERS FROM ALL EVENTS AND FORMAT ACCORDINGLY
         for (Event event : allEvents) {
             BookingWaitlistingManager mgr = event.getManager();
 
@@ -822,18 +991,25 @@ public class HelloController implements Initializable {
             }
         }
 
+        //SET NEW TABLE AS CURRENT TABLE
         bookingTable.setItems(displayBookings);
         bookingTable.refresh();
     }
 
+    //REFRESHES WAITLIST TABLE AND DISPLAYS WAITLIST OF SELECTED EVENT
+    //PRECONDITION:
+    //              EVENT TYPE OBJECT - EVENT TO DISPLAY WAITLIST OF
     private void refreshWaitlistTable(Event event) {
         if (waitlistTable == null || colWaitUser == null || colWaitStatus == null) return;
 
+        //SET COLUMN TITLES
         colWaitUser.setCellValueFactory(new PropertyValueFactory<>("userName"));
         colWaitStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
+        //NEW LIST FOR WAITLISTS
         ObservableList<BookingRecord> waitlistData = FXCollections.observableArrayList();
 
+        //PUTS ALL WAITLISTED USERS ONTO THE NEW LIST
         for (BookingWaitlistingManager.BookingEntry booking : event.getManager().getBookings()) {
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.WAITLISTED) {
                 continue;
@@ -850,6 +1026,7 @@ public class HelloController implements Initializable {
             ));
         }
 
+        //SETS TABLE TO NEW LIST
         waitlistTable.setItems(waitlistData);
         waitlistTable.refresh();
     }
@@ -884,6 +1061,7 @@ public class HelloController implements Initializable {
         return summary.toString();
     }
 
+    //*** UNUSED METHOD TO DISPLAY BOOKING INFO ***
     private String getUserBookingSummary(User user) {
         StringBuilder sb = new StringBuilder();
         sb.append("--- ").append(user.getName()).append("'s Profile ---\n");
@@ -912,7 +1090,14 @@ public class HelloController implements Initializable {
         return sb.toString();
     }
 
+    //METHOD TO DISPLAY INFO OF USER ON TABLE-CLICK-POP-UP
+    //PRECONDITION:
+    //              USER TYPE OBJECT - USER TO GET INFO OF
+    //POSTCONDITION:
+    //              STRING - STRING OF PERFECTLY FORMATTED INFO FOR POP-UP
     private String getUserProfileSummary(User user) {
+
+        //CREATION OF STRING BUILDER AND ADDITION OF ALL USER ATTRIBUTES
         StringBuilder sb = new StringBuilder();
         sb.append("User ID: ").append(user.getUserId()).append("\n");
         sb.append("Email: ").append(user.getEmail()).append("\n");
@@ -921,6 +1106,7 @@ public class HelloController implements Initializable {
 
         boolean hasHistory = false;
 
+        //ADDS ALL EVENTS THEY HAVE ANYTHING TO DO WITH AND THE STATUS
         for (Event event : allEvents) {
             BookingWaitlistingManager mgr = event.getManager();
             if (mgr.containsUser(user)) {
@@ -932,6 +1118,7 @@ public class HelloController implements Initializable {
             }
         }
 
+        //ADD THIS INSTEAD IF ABSOLUTELY NOTHING BOOKED / WAITLISTED
         if (!hasHistory) {
             sb.append("No bookings found for this user.");
         }
@@ -939,13 +1126,20 @@ public class HelloController implements Initializable {
         return sb.toString();
     }
 
+    //METHOD TO DISPLAY INFO OF EVENT ON TABLE-CLICK-POP-UP
+    //PRECONDITION:
+    //              EVENT TYPE OBJECT - EVENT TO GET INFO OF
+    //POSTCONDITION:
+    //              STRING - STRING OF PERFECTLY FORMATTED INFO FOR POP-UP
     private String getEventProfileSummary(Event event) {
 
+        //CREATION OF STRING BUILDER AND ADDITION OF ALL EVENT ATTRIBUTES
         StringBuilder sb = new StringBuilder();
         sb.append("Event ID: ").append(event.getEventId()).append("\n");
         sb.append("Capacity: ").append(event.getCapacity()).append("\n");
         sb.append("Location: ").append(event.getLocation()).append("\n");
         sb.append("Time: ").append(event.getDateTime()).append("\n");
+        sb.append("Type: ").append(event.getEventType()).append("\n");
 
         switch (event.getEventType()) {
             case SEMINAR -> sb.append("Speaker: ").append(event.getSpecificAttribute()).append("\n");
@@ -956,6 +1150,7 @@ public class HelloController implements Initializable {
         sb.append("Status: ").append(event.getStatus()).append("\n\n");
         sb.append("CURRENT BOOKINGS:\n");
 
+        //ADDS ALL USERS THAT ARE CURRENTLY BOOKED TO THIS EVENT
         List<BookingWaitlistingManager.BookingEntry> bookings = event.getManager().getBookings();
 
         for(BookingWaitlistingManager.BookingEntry booking : bookings) {
