@@ -823,6 +823,13 @@ public class HelloController implements Initializable {
                 try {
                     selectedEvent.setTitle(titleField.getText());
                     selectedEvent.setLocation(locationField.getText());
+                    if(Integer.parseInt(capacityField.getText()) < 1) {
+                        Alert error = new Alert(Alert.AlertType.ERROR);
+                        error.setTitle("Update Failed");
+                        error.setContentText("Invalid capacity");
+                        error.showAndWait();
+                        return;
+                    }
                     selectedEvent.setCapacity(Integer.parseInt(capacityField.getText()));
                     selectedEvent.setDateTime(java.time.LocalDateTime.parse(dateTimeField.getText()));
 
@@ -845,6 +852,8 @@ public class HelloController implements Initializable {
                     error.showAndWait();
                 }
             }
+
+            eventTable.refresh();
         });
     }
 
