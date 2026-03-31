@@ -21,7 +21,7 @@
                  <children>
                      <TextField fx:id="eventIdField" prefWidth="70.0" promptText="Event ID" />
                      <TextField fx:id="eventTitleField" prefWidth="80.0" promptText="Title" />
-                     <TextField prefWidth="80.0" promptText="Location" />
+                     <TextField fx:id="eventLocationField" prefWidth="80.0" promptText="Location" />
                      <TextField fx:id="eventCapacityField" prefWidth="80.0" promptText="Capacity" />
                      <TextField fx:id="eventDateTimeField" prefWidth="80.0" promptText="yyyy-MM-ddTHH:mm" />
                      <TextField fx:id="specificAttributeField" prefWidth="110.0" promptText="Topic/Speaker/Age" />
