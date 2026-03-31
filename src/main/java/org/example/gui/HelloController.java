@@ -355,9 +355,10 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
-        //IF BOOKING IS CANCELLED, INFORM USER WITH A POP-UP
+        boolean promotion = selectedEvent.getManager().getStatus(selectedUser).equals("Booked");
         boolean cancelled = selectedEvent.getManager().cancelBooking(selectedUser);
 
+        //IF BOOKING IS CANCELLED, INFORM USER WITH A POP-UP
         if (cancelled) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Booking Cancelled");
@@ -366,16 +367,18 @@ public class HelloController implements Initializable {
             alert.showAndWait();
 
             //IF SOMEONE IS PROMOTED FROM WAITLISTED TO CONFIRMED, ALSO NOTIFY WITH POP-UP
-            loop:
-            for(BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
-                if(booking.getStatus() == BookingWaitlistingManager.BookingStatus.WAITLISTED) {
+            if(promotion) {
+                loop:
+                for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
+                    if (booking.getStatus() == BookingWaitlistingManager.BookingStatus.WAITLISTED) {
 
-                    Alert noti = new Alert(Alert.AlertType.INFORMATION);
-                    noti.setTitle("Waitlist Updated");
-                    noti.setHeaderText(null);
-                    noti.setContentText(booking.getUser().getName() + " Has been confirmed");
-                    noti.showAndWait();
-                    break loop;
+                        Alert noti = new Alert(Alert.AlertType.INFORMATION);
+                        noti.setTitle("Waitlist Updated");
+                        noti.setHeaderText(null);
+                        noti.setContentText(booking.getUser().getName() + " Has been confirmed");
+                        noti.showAndWait();
+                        break loop;
+                    }
                 }
             }
 
