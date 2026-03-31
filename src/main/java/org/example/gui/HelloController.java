@@ -200,10 +200,14 @@ public class HelloController implements Initializable {
 
         //GET BOOKING MANAGER FROM EVENT
         BookingWaitlistingManager manager = event.getManager();
+        int confirmCounter = 0;
 
-        //GO THROUGH MANAGER AND TURN ALL NON-CANCELLED BOOKINGS TO WAITLISTED
+        //GO THROUGH MANAGER AND TURN ALL NON-CANCELLED BOOKINGS TO WAITLISTED + COUNT CONFIRMED ONES
         for (BookingWaitlistingManager.BookingEntry booking : manager.getBookings()) {
             if (booking.getStatus() != BookingWaitlistingManager.BookingStatus.CANCELLED) {
+                if (booking.getStatus() == BookingWaitlistingManager.BookingStatus.CONFIRMED) {
+                    confirmCounter++;
+                }
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.WAITLISTED);
             }
         }
@@ -229,6 +233,15 @@ public class HelloController implements Initializable {
                     && userConfirmedElsewhere < user.getMaxConfirmedBookings()) {
                 booking.setStatus(BookingWaitlistingManager.BookingStatus.CONFIRMED);
                 confirmedCountForEvent++;
+
+                //IF SOMEONE IS PROMOTED FROM WAITLISTED TO CONFIRMED, ALSO NOTIFY WITH POP-UP
+                if(confirmedCountForEvent > confirmCounter) {
+                    Alert noti = new Alert(Alert.AlertType.INFORMATION);
+                    noti.setTitle("Waitlist Updated");
+                    noti.setHeaderText(null);
+                    noti.setContentText(booking.getUser().getName() + " Has been confirmed");
+                    noti.showAndWait();
+                }
 
             //ELSE KEEP THEM ON WAITLISTED
             } else {
@@ -355,7 +368,6 @@ public class HelloController implements Initializable {
 
         if (selectedUser == null || selectedEvent == null) return;
 
-        boolean promotion = selectedEvent.getManager().getStatus(selectedUser).equals("Booked");
         boolean cancelled = selectedEvent.getManager().cancelBooking(selectedUser);
 
         //IF BOOKING IS CANCELLED, INFORM USER WITH A POP-UP
@@ -365,22 +377,6 @@ public class HelloController implements Initializable {
             alert.setHeaderText(null);
             alert.setContentText("Booking status changed to Cancelled.");
             alert.showAndWait();
-
-            //IF SOMEONE IS PROMOTED FROM WAITLISTED TO CONFIRMED, ALSO NOTIFY WITH POP-UP
-            if(promotion) {
-                loop:
-                for (BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
-                    if (booking.getStatus() == BookingWaitlistingManager.BookingStatus.WAITLISTED) {
-
-                        Alert noti = new Alert(Alert.AlertType.INFORMATION);
-                        noti.setTitle("Waitlist Updated");
-                        noti.setHeaderText(null);
-                        noti.setContentText(booking.getUser().getName() + " Has been confirmed");
-                        noti.showAndWait();
-                        break loop;
-                    }
-                }
-            }
 
             refreshAllEventStatuses();
             refreshALLBookingsTable();
@@ -831,6 +827,7 @@ public class HelloController implements Initializable {
                         return;
                     }
                     selectedEvent.setCapacity(Integer.parseInt(capacityField.getText()));
+                    selectedEvent.getManager().setCapacity(Integer.parseInt(capacityField.getText()));
                     selectedEvent.setDateTime(java.time.LocalDateTime.parse(dateTimeField.getText()));
 
                     if (selectedEvent instanceof Workshop) {
@@ -853,6 +850,7 @@ public class HelloController implements Initializable {
                 }
             }
 
+            refreshSingleEventStatuses(selectedEvent);
             eventTable.refresh();
         });
     }
