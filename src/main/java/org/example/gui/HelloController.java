@@ -35,7 +35,7 @@ public class HelloController implements Initializable {
 
     @FXML private TextField eventSearchField;
     @FXML private ComboBox<String> eventTypeFilter;
-    @FXML private TextField eventIdField, eventTitleField, eventCapacityField, specificAttributeField, eventDateTimeField;
+    @FXML private TextField eventIdField, eventTitleField, eventLocationField, eventCapacityField, specificAttributeField, eventDateTimeField;
     @FXML private ComboBox<String> eventTypeDropdown;
 
     @FXML private ComboBox<String> bookingUserSelection;
@@ -602,10 +602,10 @@ public class HelloController implements Initializable {
             }
 
             Event newEvent = type.equals("Workshop")
-                    ? new Workshop(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText())
+                    ? new Workshop(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText())
                     : type.equals("Seminar")
-                    ? new Seminar(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText())
-                    : new Concert(eId, eventTitleField.getText(), eventDateTime, "TBD", cap, specificAttributeField.getText());
+                    ? new Seminar(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText())
+                    : new Concert(eId, eventTitleField.getText(), eventDateTime, eventLocationField.getText(), cap, specificAttributeField.getText());
 
             allEvents.add(newEvent);
             refreshAllEventStatuses();
@@ -615,6 +615,7 @@ public class HelloController implements Initializable {
             fillAllDropdowns();
             eventIdField.clear();
             eventTitleField.clear();
+            eventLocationField.clear();
             eventCapacityField.clear();
             specificAttributeField.clear();
             eventDateTimeField.clear();
