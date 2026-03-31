@@ -20,6 +20,8 @@ import javafx.scene.control.ButtonBar;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -362,6 +364,20 @@ public class HelloController implements Initializable {
             alert.setHeaderText(null);
             alert.setContentText("Booking status changed to Cancelled.");
             alert.showAndWait();
+
+            //IF SOMEONE IS PROMOTED FROM WAITLISTED TO CONFIRMED, ALSO NOTIFY WITH POP-UP
+            loop:
+            for(BookingWaitlistingManager.BookingEntry booking : selectedEvent.getManager().getBookings()) {
+                if(booking.getStatus() == BookingWaitlistingManager.BookingStatus.WAITLISTED) {
+
+                    Alert noti = new Alert(Alert.AlertType.INFORMATION);
+                    noti.setTitle("Waitlist Updated");
+                    noti.setHeaderText(null);
+                    noti.setContentText(booking.getUser().getName() + " Has been confirmed");
+                    noti.showAndWait();
+                    break loop;
+                }
+            }
 
             refreshAllEventStatuses();
             refreshALLBookingsTable();
