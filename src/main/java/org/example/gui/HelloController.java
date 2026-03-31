@@ -743,6 +743,10 @@ public class HelloController implements Initializable {
 
             //FIRST CATCH FOR WHETHER CAPACITY IS A NUMBER
             int cap = Integer.parseInt(eventCapacityField.getText());
+            if(cap < 1) {
+                System.out.println("The Event has an invalid capacity");
+                return;
+            }
 
             //TRY-CATCH FOR IF LOCALDATETIME IS IN THE CORRECT FORMAT
             java.time.LocalDateTime eventDateTime;
