@@ -1,30 +1,72 @@
 package campusbooking;
 
+import java.util.*;
+
 public class CampusEventBookingSystem {
 
-    private UserManager userManager = new UserManager();
-    private EventManager eventManager = new EventManager();
-    private BookingManager bookingManager =
-            new BookingManager(userManager, eventManager);
+    private UserManager userManager;
+    private EventManager eventManager;
+    private BookingManager bookingManager;
 
-    public UserManager users() {
-        return userManager;
+    public CampusEventBookingSystem() {
+        userManager = new UserManager();
+        eventManager = new EventManager();
+        bookingManager = new BookingManager();
+
+        loadSampleData();
     }
 
-    public EventManager events() {
-        return eventManager;
+    private void loadSampleData() {
+
+        // USERS
+        userManager.addUser(new Student("U1", "Mateen", "m@email.com"));
+        userManager.addUser(new Staff("U2", "Alice", "a@email.com"));
+        userManager.addUser(new Guest("U3", "Bob", "b@email.com"));
+
+        // EVENTS
+        eventManager.addEvent(new Concert("E1", "Music Night", "Hall A", 2));
+        eventManager.addEvent(new Workshop("E2", "Coding Bootcamp", "Lab 1", 3));
+        eventManager.addEvent(new Seminar("E3", "AI Talk", "Room 301", 1));
     }
 
-    public BookingManager bookings() {
-        return bookingManager;
+    //  EVENTS
+    public Collection<Event> listEvents() {
+        return eventManager.getAllEvents();
     }
 
-    public void loadSampleData() {
+    //  USERS
+    public Collection<User> listUsers() {
+        return userManager.getAllUsers();
+    }
 
-        userManager.addUser(new User("U1:","Alice","alice@guelph.ca"));
-        userManager.addUser(new User("U2:","Bob","bob@guelph.ca"));
+    //  CREATE BOOKING
+    public boolean createBooking(String userId, String eventId) {
 
-        eventManager.addEvent(new Event("E1:","Java Workshop","SSC",20));
-        eventManager.addEvent(new Event("E2:","AI Seminar","THRN",30));
+        User u = userManager.getUser(userId);
+        Event e = eventManager.getEvent(eventId);
+
+        if (u == null || e == null) return false;
+
+        String bookingId = "B" + (bookingManager.getAllBookings().size() + 1);
+
+        return bookingManager.createBooking(bookingId, u, e);
+    }
+
+    //  CANCEL
+    public boolean cancelBooking(String bookingId) {
+        return bookingManager.cancelBooking(bookingId);
+    }
+
+    //  BOOKINGS
+    public boolean hasBookings() {
+        return bookingManager.hasBookings();
+    }
+
+    public Collection<Booking> getAllBookings() {
+        return bookingManager.getAllBookings();
+    }
+
+    public List<Booking> getUserBookings(String userId) {
+        return bookingManager.getBookingsForUser(userId);
     }
 }
